@@ -16,6 +16,7 @@ This is a minimalist full-stack project template for applications with multi-use
   - **SQLAlchemy** for database interactions (ORM)
   - **Pydantic** for data validation and settings management
   - **PostgreSQL** as the database
+
 🚀 **React** for the frontend
   - **Material UI** for frontend components
   - **Nginx** for serving the frontend
