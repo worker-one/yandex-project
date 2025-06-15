@@ -4,6 +4,10 @@ const ACCESS_TOKEN_KEY = 'accessToken';
 const REFRESH_TOKEN_KEY = 'refreshToken';
 const USER_PROFILE_KEY = 'userProfile';
 
+// Yandex OAuth Configuration (replace with your actual credentials, ideally from env vars)
+const YANDEX_CLIENT_ID = '303d7df8e9d74b39961e89aa60fb4fae';
+const YANDEX_REDIRECT_URI = 'http://localhost:3000/auth/yandex/callback';
+
 // Token handling functions
 export function saveTokens(accessToken, refreshToken) {
     localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
@@ -79,6 +83,74 @@ export async function handleLogin(email, password) {
         console.error('Login failed:', error);
         // Re-throw the error so the calling component can handle it
         throw error;
+    }
+}
+
+/**
+ * Redirects the user to Yandex OAuth authorization page.
+ */
+export function redirectToYandexOAuth() {
+    const yandexAuthUrl = `https://oauth.yandex.ru/authorize?response_type=code&client_id=${YANDEX_CLIENT_ID}&redirect_uri=${encodeURIComponent(YANDEX_REDIRECT_URI)}&scope=login:email login:info iot:view`;
+    window.location.href = yandexAuthUrl;
+}
+
+/**
+ * Handles the callback from Yandex OAuth.
+ * Sends the authorization code to the backend, receives app tokens and profile.
+ * @param {string} code - The authorization code from Yandex.
+ * @returns {Promise<object>} - User profile if login successful.
+ * @throws {Error} - If OAuth callback processing fails.
+ */
+export async function handleYandexOAuthCallback(code) {
+    try {
+        console.log(`Processing Yandex OAuth code: ${code}`);
+        
+        const response = await fetch('http://localhost:8000/api/v1/auth/yandex/callback', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ code }),
+        });
+
+        // Log the raw response text for debugging
+        const responseText = await response.text();
+        console.log("Raw response from /api/yandex/callback:", responseText);
+        console.log("Response status:", response.status);
+        console.log("Response headers:", Object.fromEntries(response.headers.entries()));
+
+
+        if (!response.ok) {
+            // Try to parse as JSON if it's an error, otherwise use the text
+            let errorMessage = `Yandex OAuth failed with status: ${response.status}`;
+            try {
+                const errorData = JSON.parse(responseText);
+                errorMessage = errorData.message || errorData.detail || errorMessage;
+            } catch (e) {
+                // If parsing errorData fails, use the raw responseText if it's short, or a generic message
+                errorMessage = responseText.length < 200 ? responseText : errorMessage;
+            }
+            throw new Error(errorMessage);
+        }
+
+        const data = JSON.parse(responseText); // Parse the logged text
+
+        if (data.access_token && data.refresh_token && data.user_profile) {
+            saveTokens(data.access_token, data.refresh_token);
+            saveUserProfile(data.user_profile);
+            console.log("Yandex OAuth successful, tokens and profile saved.");
+            window.location.href = '/'; // Redirect to home or dashboard
+            return data.user_profile;
+        } else {
+            console.error("Yandex OAuth callback response missing tokens or profile:", data);
+            throw new Error('Yandex OAuth failed: Invalid response from server.');
+        }
+    } catch (error) {
+        console.error('Yandex OAuth callback failed:', error);
+        clearAuthData(); // Clear any partial auth data
+        // Potentially redirect to an error page or show a message on the callback page
+        // window.location.href = '/login?error=yandex_oauth_failed'; 
+        throw error; // Re-throw for the callback page component to handle
     }
 }
 

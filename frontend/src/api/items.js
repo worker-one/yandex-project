@@ -27,13 +27,28 @@ export async function adminListUsers(params = { skip: 0, limit: 50 }) {
 
 
 /**
- * Fetches a paginated, sorted list of items.
- * @param {object} params - { field, direction, limit, page }
- * @returns {Promise<object>} - { items: [], total: number }
+ * Fetches a paginated, sorted, and filtered list of items.
+ * @param {object} params - Parameters for pagination, sorting, and filtering.
+ * @param {number} [params.page] - Page number (1-indexed for API).
+ * @param {number} [params.limit] - Number of items per page.
+ * @param {string} [params.name] - Filter by item name (substring match).
+ * @param {number} [params.user_id] - Filter by owner's user ID.
+ * @param {string} [params.field] - Field to sort by (e.g., 'name', 'device_id', 'is_online', 'last_seen', 'user_id', 'created_at', 'updated_at').
+ * @param {string} [params.direction] - Sort direction ('asc' or 'desc').
+ * @returns {Promise<object>} - An object containing the list of items and the total count, e.g., { items: [], total: number }.
  */
 export async function fetchItems(params = {}) {
     const query = new URLSearchParams(params).toString();
     return fetchApi(`/items/?${query}`, { method: 'GET' });
+}
+
+
+/**
+ * Calls the backend to sync Yandex IoT devices for the current user.
+ * @returns {Promise<Array<object>>} - A list of synced item objects.
+ */
+export async function syncYandexIoTDevices() {
+    return fetchApi('/auth/profile/yandex-iot/sync-devices', { method: 'POST' }, true); // Requires auth
 }
 
 

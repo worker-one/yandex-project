@@ -1,5 +1,5 @@
 from sqlalchemy import (
-    Boolean, Column, Integer, String, Text, ForeignKey
+    Boolean, Column, Integer, String, Text, ForeignKey, DateTime  # Added DateTime
 )
 from sqlalchemy.orm import relationship
 
@@ -14,19 +14,16 @@ class Item(Base, TimeStampMixin):
     __tablename__ = 'items'
 
     id = Column(Integer, primary_key=True, index=True)
-
-    # common fields moved from Exchange / defined for Book
-    name = Column(String(255), nullable=False, index=True)
-    description = Column(Text, nullable=True)
-    image_url = Column(String(512), nullable=True)
-    website_url = Column(String(512), nullable=True)
-    available = Column(Boolean, nullable=False, default=0)
-    average_rating = Column(Integer, nullable=True, default=0)
-    owner_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    device_id = Column(String(100), unique=True, nullable=False)
+    name = Column(String(100))
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    position = Column(Integer, default=0)  # 0-100
+    is_online = Column(Boolean, default=False)
+    last_seen = Column(DateTime)
 
     # relationship fields
     owner = relationship(
         "User", 
         back_populates="items",
-        foreign_keys=[owner_id]
+        foreign_keys=[user_id]  # Corrected from owner_id to user_id
     )

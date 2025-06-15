@@ -18,6 +18,10 @@ class User(Base, TimeStampMixin):
     password_hash = Column(String(255), nullable=False)
     name = Column(String(100), nullable=False, unique=True, index=True) # Index name too
     avatar_url = Column(String(512), nullable=True)
+    yandex_oauth_access_token = Column(String, nullable=True)
+    yandex_oauth_refresh_token = Column(String, nullable=True)
+    yandex_oauth_token_expires_at = Column(DateTime, nullable=True)
+    yandex_id = Column(String, nullable=True, unique=True, index=True) # Add Yandex ID
     is_superuser = Column(Boolean, nullable=False, default=False)
     is_active = Column(Boolean, nullable=False, default=True) # Optional: If user blocking is needed
 

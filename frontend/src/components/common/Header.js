@@ -52,11 +52,11 @@ const Header = () => {
               component="img"
               // Ensure this path is correct for your React project (e.g., in public folder or imported)
               src="../../assets/images/logo.png" 
-              alt="Full-stack Template Logo"
+              alt="Window Controller App Logo"
               sx={{ height: 40, mr: 1 }} // mr is margin-right
             />
             <Typography variant="h6" component="div" className="logo-text"> {/* Preserving original class */}
-              Full-Stack Template
+              Window Controller App
             </Typography>
           </MuiLink>
 

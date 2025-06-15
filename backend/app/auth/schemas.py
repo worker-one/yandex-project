@@ -16,6 +16,10 @@ class UserRead(UserBase):
     is_superuser: bool
     email_verified_at: Optional[datetime] = None
     created_at: datetime
+    yandex_oauth_access_token: Optional[str] = None
+    yandex_oauth_refresh_token: Optional[str] = None
+    yandex_oauth_token_expires_at: Optional[datetime] = None
+    yandex_id: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -31,7 +35,8 @@ class UserPasswordUpdate(BaseModel):
 
 # --- Login Schemas ---
 class LoginRequest(BaseModel):
-    email: EmailStr
+    email: EmailStr = None
+    username: Optional[str] = None
     password: str
     
 class TokenPayload(BaseModel):
@@ -46,3 +51,12 @@ class Token(BaseModel):
 
 class RefreshTokenRequest(BaseModel):
     refresh_token: str
+
+# --- Yandex OAuth Schemas ---
+class YandexOAuthCode(BaseModel):
+    code: str
+
+class YandexCallbackResponseData(BaseModel):
+    access_token: str
+    refresh_token: str
+    user_profile: UserRead # Use your existing UserRead schema

@@ -1,6 +1,6 @@
 // filepath: /home/konstantin/workspace/crypta-info-react/frontend/src/components/ExchangeDetails/ExchangeInfo.js
 import React from 'react';
-import { Box, Typography, Grid, Paper, Avatar, Rating, Link, Chip } from '@mui/material';
+import { Box, Typography, Grid, Paper, Link, Chip } from '@mui/material'; // Removed Avatar, Rating
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 
@@ -10,53 +10,40 @@ const ItemDetails = ({ item }) => {
     return (
         <Paper elevation={3} sx={{ p: 3, mt: 2 }}>
             <Grid container spacing={2} alignItems="center" sx={{ mb: 3 }}>
-                <Grid item sx={{ mr: 2 }}> {/* Image */}
-                    <Avatar src={item.image_url || '/assets/images/image-placeholder.png'} alt={`${item.name} Image`} sx={{ width: 56, height: 56 }} variant="rounded" />
-                </Grid>
-
                 {/* Name */}
-                <Grid item xs={10} sm md={4}>
+                <Grid item xs={12}> {/* Adjusted grid for name */}
                     <Typography variant="h4">{item.name}</Typography>
                 </Grid>
-
-                {/* Rating */}
-                {item.average_rating !== null && typeof item.average_rating !== 'undefined' && (
-                    <Grid item xs={12} sm={6} md={3}>
-                        <Rating value={parseFloat(item.average_rating) || 0} precision={0.1} readOnly />
-                        {item.total_rating_count !== null && typeof item.total_rating_count !== 'undefined' && (
-                            <Typography variant='caption' color="text.secondary" sx={{ ml: 1 }}>
-                                ({item.total_rating_count} {item.total_rating_count === 1 ? 'review' : 'reviews'})
-                            </Typography>
-                        )}
-                    </Grid>
-                )}
             </Grid>
-
-            {item.description && (
-                <Box sx={{ mb: 3 }}>
-                    <Typography variant="h6" gutterBottom>Description</Typography>
-                    <Typography variant="body1" dangerouslySetInnerHTML={{ __html: item.description }} />
-                </Box>
-            )}
 
             <Grid container spacing={3}>
                 <Grid item xs={12} md={6}>
                     <Paper variant="outlined" sx={{ p: 2, height: '100%' }}>
                         <Typography variant="h6" gutterBottom>Details</Typography>
-                        {item.website_url && (
+                        <Typography variant="body2" sx={{ mb: 1 }}>
+                            Device ID: {item.device_id}
+                        </Typography>
+                        <Typography variant="body2" sx={{ mb: 1 }}>
+                            Position: {item.position}
+                        </Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                            <Typography variant="body2" sx={{ mr: 1 }}>Online Status:</Typography>
+                            {item.is_online ? <CheckCircleIcon color="success" /> : <CancelIcon color="error" />}
+                            {item.is_online ? <Typography variant="body2" sx={{ ml: 0.5 }}>Online</Typography> : <Typography variant="body2" sx={{ ml: 0.5 }}>Offline</Typography>}
+                        </Box>
+                        {item.last_seen && (
                             <Typography variant="body2" sx={{ mb: 1 }}>
-                                Website: <Link href={item.website_url} target="_blank" rel="noopener noreferrer">{item.website_url}</Link>
+                                Last Seen: {new Date(item.last_seen).toLocaleString()}
                             </Typography>
                         )}
-                        {typeof item.available === 'boolean' && (
-                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                                <Typography variant="body2" sx={{ mr: 1 }}>Available:</Typography>
-                                {item.available ? <CheckCircleIcon color="success" /> : <CancelIcon color="error" />}
-                            </Box>
-                        )}
-                        {item.owner && item.owner.name && (
+                        {item.owner && item.owner.name && ( // Assuming owner might still be part of the fetched data if populated
                             <Typography variant="body2" sx={{ mb: 1 }}>
-                                Created by: {item.owner.name}
+                                Owner: {item.owner.name}
+                            </Typography>
+                        )}
+                         {item.owner && item.owner.email && ( // Display owner email if available
+                            <Typography variant="body2" sx={{ mb: 1 }}>
+                                Owner Email: <Link href={`mailto:${item.owner.email}`}>{item.owner.email}</Link>
                             </Typography>
                         )}
                         {item.created_at && (
@@ -72,18 +59,8 @@ const ItemDetails = ({ item }) => {
                     </Paper>
                 </Grid>
 
-                {item.tags && item.tags.length > 0 && (
-                    <Grid item xs={12} md={6}>
-                        <Paper variant="outlined" sx={{ p: 2, height: '100%' }}>
-                            <Typography variant="h6" gutterBottom>Tags</Typography>
-                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                                {item.tags.map((tag, index) => (
-                                    <Chip key={index} label={tag} size="small" />
-                                ))}
-                            </Box>
-                        </Paper>
-                    </Grid>
-                )}
+                {/* Placeholder for any other sections if needed in the future */}
+                {/* For example, if you re-introduce a simplified tags or related items section */}
             </Grid>
         </Paper>
     );

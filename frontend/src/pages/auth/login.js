@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import Header from '../../components/common/Header';
 import Footer from '../../components/common/Footer';
-import { Container, Typography, Box, TextField, Button, Alert } from '@mui/material';
-import { handleLogin } from '../../api/auth'; // Assuming handleLogin is updated
+import { Container, Typography, Box, TextField, Button, Alert, Divider } from '@mui/material'; // Added Divider
+import { handleLogin, redirectToYandexOAuth } from '../../api/auth'; // Assuming handleLogin is updated, Added redirectToYandexOAuth
 // import { useNavigate } from 'react-router'; // Uncomment if using React Router
 
 const LoginPage = () => {
@@ -22,6 +22,10 @@ const LoginPage = () => {
     } catch (err) {
       setError(err.message || 'Login failed. Please check your credentials.');
     }
+  };
+
+  const handleYandexSignIn = () => {
+    redirectToYandexOAuth();
   };
 
   return (
@@ -75,6 +79,15 @@ const LoginPage = () => {
               sx={{ mt: 3, mb: 2 }}
             >
               Sign In
+            </Button>
+            <Divider sx={{ my: 2 }}>OR</Divider>
+            <Button
+              fullWidth
+              variant="outlined"
+              onClick={handleYandexSignIn}
+              sx={{ mb: 2 }}
+            >
+              Sign In with Yandex
             </Button>
           </Box>
           <Typography variant="body2" color="text.secondary" align="center">

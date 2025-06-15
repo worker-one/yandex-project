@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import Header from '../../components/common/Header';
 import Footer from '../../components/common/Footer';
-import { Container, Typography, Box, TextField, Button, Alert } from '@mui/material';
-import { handleRegister } from '../../api/auth'; // Assuming handleRegister is updated
+import { Container, Typography, Box, TextField, Button, Alert, Divider } from '@mui/material'; // Added Divider
+import { handleRegister, redirectToYandexOAuth } from '../../api/auth'; // Assuming handleRegister is updated, Added redirectToYandexOAuth
 // import { useNavigate } from 'react-router'; // Uncomment if using React Router
 
 const RegisterPage = () => {
@@ -28,6 +28,10 @@ const RegisterPage = () => {
     } catch (err) {
       setError(err.message || 'Registration failed. Please try again.');
     }
+  };
+
+  const handleYandexSignUp = () => {
+    redirectToYandexOAuth();
   };
 
   return (
@@ -90,6 +94,15 @@ const RegisterPage = () => {
               sx={{ mt: 3, mb: 2 }}
             >
               Sign Up
+            </Button>
+            <Divider sx={{ my: 2 }}>OR</Divider>
+            <Button
+              fullWidth
+              variant="outlined"
+              onClick={handleYandexSignUp}
+              sx={{ mb: 2 }}
+            >
+              Sign Up with Yandex
             </Button>
           </Box>
         </Box>

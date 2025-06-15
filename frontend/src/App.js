@@ -7,6 +7,7 @@ import LoginPage from './pages/auth/login.js';
 import RegisterPage from './pages/auth/register.js';
 import ProfilePage from './pages/auth/profile.js';
 import ItemsDetailsPage from './pages/items/ItemsDetailsPage.js';
+import YandexOAuthCallbackPage from './pages/auth/YandexOAuthCallbackPage.js'; // Add this import
 
 // Basic theme for Material UI
 const theme = createTheme({
@@ -44,6 +45,7 @@ function App() {
                     <Route path="/register" element={<RegisterPage />} />
                     <Route path="/profile" element={<ProfilePage />} />
                     <Route path="/items/:itemId" element={< ItemsDetailsPage />} />
+                    <Route path="/auth/yandex/callback" element={<YandexOAuthCallbackPage />} /> {/* Add this route */}
                 </Routes>
             </main>
         </ThemeProvider>

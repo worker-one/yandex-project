@@ -1,29 +1,32 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
-  TableSortLabel, TablePagination, CircularProgress, Typography, Box, Button, Link as MuiLink, Avatar
+  TableSortLabel, TablePagination, CircularProgress, Typography, Box, Button, Link as MuiLink, Chip // Added Chip
 } from '@mui/material';
 import { Link as RouterLink, useNavigate } from 'react-router';
 import { fetchItems as fetchItemsAPI } from '../../api/items'; // <-- Use API module
+import CheckCircleIcon from '@mui/icons-material/CheckCircle'; // For online status
+import CancelIcon from '@mui/icons-material/Cancel'; // For offline status
 
 const DEFAULT_ROWS_PER_PAGE = 20;
 
 const headCells = [
   { id: 'index', numeric: true, disablePadding: false, label: '#', sortable: false, align: 'center' },
-  { id: 'image', numeric: false, disablePadding: false, label: '', sortable: false, align: 'center' },
-  { id: 'name', numeric: false, disablePadding: false, label: 'Name', sortable: true, align: 'center' },
-  { id: 'rating', numeric: true, disablePadding: false, label: 'Rating', sortable: true, align: 'center' },
-  { id: 'creator', numeric: true, disablePadding: false, label: 'Creator', sortable: true, align: 'center' },
-  { id: 'actions', numeric: false, disablePadding: false, label: '', sortable: false, align: 'center' },
+  { id: 'name', numeric: false, disablePadding: false, label: 'Name', sortable: true, align: 'left' }, // Align left for better readability
+  { id: 'device_id', numeric: false, disablePadding: false, label: 'Device ID', sortable: true, align: 'left' },
+  { id: 'is_online', numeric: false, disablePadding: false, label: 'Status', sortable: true, align: 'center' },
+  { id: 'last_seen', numeric: false, disablePadding: false, label: 'Last Seen', sortable: true, align: 'center' },
+  { id: 'owner', numeric: false, disablePadding: false, label: 'Owner', sortable: true, align: 'left' }, // Sortable by owner name (if API supports)
+  { id: 'actions', numeric: false, disablePadding: false, label: 'Actions', sortable: false, align: 'center' }, // Changed label to 'Actions'
 ];
 
 
-const ItemsTable = () => {
+const ItemsTable = ({ refreshTrigger }) => { // Add refreshTrigger to props
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [order, setOrder] = useState('desc');
-  const [orderBy, setOrderBy] = useState('name');
+  const [orderBy, setOrderBy] = useState('name'); // Default sort by name
   const [page, setPage] = useState(0); // 0-indexed
   const [rowsPerPage, setRowsPerPage] = useState(DEFAULT_ROWS_PER_PAGE);
   const [totalRows, setTotalRows] = useState(0);
@@ -34,7 +37,7 @@ const ItemsTable = () => {
     setError(null);
     try {
       const params = {
-        field: orderBy,
+        field: orderBy === 'owner' ? 'owner.name' : orderBy, // Adjust if API sorts by nested field differently
         direction: order,
         limit: rowsPerPage,
         page: page + 1, // API is 1-indexed
@@ -56,7 +59,7 @@ const ItemsTable = () => {
 
   useEffect(() => {
     fetchItems();
-  }, [fetchItems]);
+  }, [fetchItems, refreshTrigger]); // Add refreshTrigger to dependency array
 
   const handleRequestSort = (property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -104,9 +107,13 @@ const ItemsTable = () => {
                   sortDirection={orderBy === headCell.id ? order : false}
                   sx={{ 
                     fontWeight: 'bold',
-                    ...(headCell.id === 'image' && { width: '80px' }), // Changed 'cover' to 'image' to match headCell id
-                    ...(headCell.id === 'index' && { width: '60px' }),
-                    ...(headCell.id === 'actions' && { width: '120px' })
+                    ...(headCell.id === 'index' && { width: '5%' }),
+                    ...(headCell.id === 'name' && { width: '20%' }),
+                    ...(headCell.id === 'device_id' && { width: '20%' }),
+                    ...(headCell.id === 'is_online' && { width: '10%' }),
+                    ...(headCell.id === 'last_seen' && { width: '15%' }),
+                    ...(headCell.id === 'owner' && { width: '15%' }),
+                    ...(headCell.id === 'actions' && { width: '15%' })
                   }}
                 >
                   {headCell.sortable ? (
@@ -128,16 +135,13 @@ const ItemsTable = () => {
             {items.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={headCells.length} align="center" sx={{ py: 3, color: 'text.secondary' }}>
-                  No items found matching your criteria.
+                  No items found.
                 </TableCell>
               </TableRow>
             ) : (
               items.map((item, index) => {
                 const startIndex = page * rowsPerPage;
-                const ratingValue = parseFloat(item.overall_average_rating);
-                const formattedRating = isNaN(ratingValue) ? 'N/A' : ratingValue.toFixed(1);
-                const reviewCount = item.total_review_count?.toLocaleString() ?? 'N/A';
-
+                
                 return (
                   <TableRow
                     hover
@@ -150,40 +154,39 @@ const ItemsTable = () => {
                       {startIndex + index + 1}
                     </TableCell>
 
-                    {/* Cover */}
-                    <TableCell align="center">
-                      <Avatar
-                        src={item.image_url}
-                        alt={`${item.name || 'Book'} Cover`}
-                        variant="square"
-                        sx={{ 
-                          width: 50, 
-                          height: 75, 
-                          mx: 'auto',
-                          bgcolor: 'grey.200'
-                        }}
-                      >
-                      </Avatar>
-                    </TableCell>
-
-                    {/* Title */}
-                    <TableCell>
+                    {/* Name */}
+                    <TableCell align="left">
                       <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
                         {item.name || 'N/A'}
                       </Typography>
                     </TableCell>
 
-                    {/* Rating */}
-                    <TableCell align="center">
-                        <Box component="span" sx={{ fontWeight: 'bold', color: 'goldenrod' }}>
-                        ★ {formattedRating}
-                        </Box>
+                    {/* Device ID */}
+                    <TableCell align="left">
+                      <Typography variant="body2">
+                        {item.device_id || 'N/A'}
+                      </Typography>
                     </TableCell>
 
-                    {/* Owner */}
+                    {/* Status (is_online) */}
                     <TableCell align="center">
-                        <MuiLink color='secondary' component={RouterLink} to={`/items/${item.id}`} onClick={(e) => e.stopPropagation()}>
-                        {item.owner.name || 'N/A'}
+                      {item.is_online ? 
+                        <Chip icon={<CheckCircleIcon />} label="Online" color="success" size="small" variant="outlined" /> :
+                        <Chip icon={<CancelIcon />} label="Offline" color="error" size="small" variant="outlined" />
+                      }
+                    </TableCell>
+
+                    {/* Last Seen */}
+                    <TableCell align="center">
+                      <Typography variant="body2">
+                        {item.last_seen ? new Date(item.last_seen).toLocaleString() : 'N/A'}
+                      </Typography>
+                    </TableCell>
+                    
+                    {/* Owner */}
+                    <TableCell align="left">
+                        <MuiLink color='secondary' component={RouterLink} to={`/users/${item.owner?.id}`} onClick={(e) => e.stopPropagation()}> {/* Optional: Link to user profile page */}
+                          {item.owner?.name || item.owner?.email || 'N/A'}
                         </MuiLink>
                     </TableCell>
 
