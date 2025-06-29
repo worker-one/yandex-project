@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link as RouterLink } from 'react-router';
 import { Container, Typography, CircularProgress, Link, Alert, Box, Button, Breadcrumbs } from '@mui/material';
-import ItemDetails from '../../components/items/ItemsDetails';
+import ItemDetails from '../../components/items/ItemsDetails.js';
 // Assuming you have an API service for items
 import { getItemDetails } from '../../api/items.js'; // Adjust the path as necessary
-import Header from '../../components/common/Header';
-import Footer from '../../components/common/Footer';
+import Header from '../../components/common/Header.js';
+import Footer from '../../components/common/Footer.js';
 
 const ItemsDetailsPage = () => {
-    const { itemId } = useParams();
+    const { itemSerialNumber } = useParams();
     const navigate = useNavigate();
     const [item, setItem] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -19,7 +19,7 @@ const ItemsDetailsPage = () => {
             try {
                 setLoading(true);
                 setError(null);
-                const data = await getItemDetails(itemId); // Updated function call
+                const data = await getItemDetails(itemSerialNumber); // Updated function call
                 setItem(data);
             } catch (err) {
                 setError(err.message || 'Failed to fetch item details.');
@@ -29,10 +29,10 @@ const ItemsDetailsPage = () => {
             }
         };
 
-        if (itemId) {
+        if (itemSerialNumber) {
             fetchItemDetails();
         }
-    }, [itemId]);
+    }, [itemSerialNumber]);
 
     if (loading) {
         return (
@@ -47,7 +47,7 @@ const ItemsDetailsPage = () => {
             <Container sx={{ mt: 5 }}>
                 <Alert severity="error">{error}</Alert>
                 <Button component={RouterLink} to="/items" variant="outlined" sx={{ mt: 2 }}>
-                    Back to Items
+                    Back to Devices
                 </Button>
             </Container>
         );
@@ -58,7 +58,7 @@ const ItemsDetailsPage = () => {
             <Container sx={{ mt: 5 }}>
                 <Typography variant="h6">Item not found.</Typography>
                 <Button component={RouterLink} to="/items" variant="outlined" sx={{ mt: 2 }}>
-                    Back to Items
+                    Back to Devices
                 </Button>
             </Container>
         );
@@ -81,13 +81,13 @@ const ItemsDetailsPage = () => {
                             Home
                         </Link>
                         <Link component="button" onClick={() => navigate('/items')} sx={{ display: 'flex', alignItems: 'center' }} color="inherit">
-                            Items
+                            Devices
                         </Link>
                         <Typography color="text.primary">{item.name}</Typography>
                     </Breadcrumbs>
 
                     <Button component={RouterLink} to="/items" variant="outlined">
-                        Back to Items
+                        Back to my devices
                     </Button>
                 </Box>
                 <ItemDetails item={item} />

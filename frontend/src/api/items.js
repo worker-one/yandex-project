@@ -48,6 +48,7 @@ export async function fetchItems(params = {}) {
  * @returns {Promise<object>} - The created item object.
  */
 export async function createItem(itemData) {
+    console.log("Creating item with data:", itemData); // Debug log
     return fetchApi('/items/', {
         method: 'POST',
         body: JSON.stringify(itemData),

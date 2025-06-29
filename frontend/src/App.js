@@ -46,7 +46,7 @@ function App() {
                     <Route path="/register" element={<RegisterPage />} />
                     <Route path="/profile" element={<ProfilePage />} />
                     <Route path="/items/create" element={<CreateItemPage />} />
-                    <Route path="/items/:itemId" element={< ItemsDetailsPage />} />
+                    <Route path="/items/:itemSerialNumber" element={<ItemsDetailsPage />} />
                     <Route path="/auth/yandex/callback" element={<YandexOAuthCallbackPage />} /> {/* Add this route */}
                 </Routes>
             </main>

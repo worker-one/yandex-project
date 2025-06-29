@@ -21,6 +21,16 @@ class ItemService:
         logger.info(f"Item with id {item_id} {'found' if item else 'not found'}.")
         return item
 
+    def get_item_by_serial_number(self, db: Session, item_serial_number: str, options: List = None) -> Optional[item_models.Item]:
+        """Retrieve a single item by its serial number."""
+        logger.info(f"Retrieving item with serial number {item_serial_number}.")
+        query = db.query(item_models.Item)
+        if options:
+            query = query.options(*options)
+        item = query.filter(item_models.Item.serial_number == item_serial_number).first()
+        logger.info(f"Item with serial number {item_serial_number} {'found' if item else 'not found'}.")
+        return item
+
     def list_items(
         self,
         db: Session,
