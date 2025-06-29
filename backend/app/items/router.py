@@ -14,6 +14,57 @@ router = APIRouter(
     prefix="/items",
 )
 
+
+@router.get("/{item_serial_number}", response_model=item_schemas.ItemRead)
+async def get_item(
+    item_serial_number: str,
+    db: Session = Depends(get_db) # Changed AsyncSession to Session
+):
+    """
+    Get a specific item by its ID.
+    """
+    item = item_service.item_service.get_item_by_serial_number(db=db, item_serial_number=item_serial_number, options=[selectinload(Item.owner)]) # Removed await
+    if not item:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
+    return item
+
+@router.put("/{item_serial_number}", response_model=item_schemas.ItemRead)
+async def update_item(
+    item_serial_number: str,
+    item_in: item_schemas.ItemUpdate,
+    db: Session = Depends(get_db), 
+    current_user: User = Depends(get_current_active_user)
+):
+    """
+    Update an item.
+    """
+    item = item_service.item_service.get_item_by_serial_number(db=db, item_serial_number=item_serial_number, options=[selectinload(Item.owner)])
+    if not item:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
+    if item.user_id != current_user.id and not current_user.is_superuser: # Changed item.owner_id to item.user_id
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
+    updated_item = item_service.item_service.update_item(db=db, item=item, item_in=item_in)
+    db.refresh(updated_item, attribute_names=["owner"])
+    return updated_item
+
+@router.delete("/{item_serial_number}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_item(
+    item_serial_number: str,
+    db: Session = Depends(get_db), 
+    current_user: User = Depends(get_current_active_user)
+):
+    """
+    Delete an item.
+    """
+    item = item_service.item_service.get_item_by_serial_number(db=db, item_serial_number=item_serial_number, options=[selectinload(Item.owner)])
+    if not item:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
+    if item.user_id != current_user.id and not current_user.is_superuser: # Changed item.owner_id to item.user_id
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
+    item_service.item_service.delete_item(db=db, item=item)
+    return None
+
+
 @router.get("/", response_model=item_schemas.ItemListResponse)
 async def list_items(
     skip: int = Query(0, ge=0),
@@ -57,55 +108,6 @@ async def create_item(
     item = item_service.item_service.create_item(db=db, item_in=item_in, owner_id=current_user.id) # Removed await
     db.refresh(item, attribute_names=["owner"]) # Removed await
     return item
-
-@router.get("/{item_id}", response_model=item_schemas.ItemRead)
-async def get_item(
-    item_id: int,
-    db: Session = Depends(get_db) # Changed AsyncSession to Session
-):
-    """
-    Get a specific item by its ID.
-    """
-    item = item_service.item_service.get_item_by_id(db=db, item_id=item_id, options=[selectinload(Item.owner)]) # Removed await
-    if not item:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
-    return item
-
-@router.put("/{item_id}", response_model=item_schemas.ItemRead)
-async def update_item(
-    item_id: int,
-    item_in: item_schemas.ItemUpdate,
-    db: Session = Depends(get_db), 
-    current_user: User = Depends(get_current_active_user)
-):
-    """
-    Update an item.
-    """
-    item = item_service.item_service.get_item_by_id(db=db, item_id=item_id, options=[selectinload(Item.owner)]) 
-    if not item:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
-    if item.user_id != current_user.id and not current_user.is_superuser: # Changed item.owner_id to item.user_id
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
-    updated_item = item_service.item_service.update_item(db=db, item=item, item_in=item_in) 
-    db.refresh(updated_item, attribute_names=["owner"]) 
-    return updated_item
-
-@router.delete("/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_item(
-    item_id: int,
-    db: Session = Depends(get_db), 
-    current_user: User = Depends(get_current_active_user)
-):
-    """
-    Delete an item.
-    """
-    item = item_service.item_service.get_item_by_id(db=db, item_id=item_id, options=[selectinload(Item.owner)]) 
-    if not item:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
-    if item.user_id != current_user.id and not current_user.is_superuser: # Changed item.owner_id to item.user_id
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
-    item_service.item_service.delete_item(db=db, item=item) 
-    return None
 
 # No changes in this file for this specific request.
 # The response models (e.g., item_schemas.ItemRead) will automatically
