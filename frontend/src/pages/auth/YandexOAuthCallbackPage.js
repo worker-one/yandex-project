@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router';
+import { useLocation, useNavigate } from 'react-router'; // Fixed import
 import { handleYandexOAuthCallback } from '../../api/auth';
 import { Container, Typography, Box, CircularProgress, Alert } from '@mui/material';
 import Header from '../../components/common/Header';
@@ -14,19 +14,28 @@ const YandexOAuthCallbackPage = () => {
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
     const code = queryParams.get('code');
+    const error = queryParams.get('error');
+
+    // Handle OAuth error from Yandex
+    if (error) {
+      setError(`OAuth error: ${error}`);
+      setLoading(false);
+      setTimeout(() => navigate('/login?error=oauth_error'), 3000);
+      return;
+    }
 
     if (code) {
       handleYandexOAuthCallback(code)
         .then(() => {
-          // The handleYandexOAuthCallback function already redirects on success
-          // setLoading(false); // Not strictly needed due to redirect
-          // navigate('/'); // This is handled by handleYandexOAuthCallback
+          setLoading(false);
+          // Add explicit navigation if handleYandexOAuthCallback doesn't redirect
+          navigate('/');
         })
         .catch((err) => {
+          console.error('OAuth callback error:', err);
           setError(err.message || 'Yandex OAuth failed. Please try again.');
           setLoading(false);
-          // Optionally redirect to login page with error
-          // setTimeout(() => navigate('/login?error=yandex_oauth_failed'), 3000);
+          setTimeout(() => navigate('/login?error=yandex_oauth_failed'), 3000);
         });
     } else {
       setError('No authorization code found. Redirecting to login...');

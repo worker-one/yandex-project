@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route } from 'react-router';
+import { HashRouter, Routes, Route } from 'react-router'; // Changed import
 import { CssBaseline, ThemeProvider, createTheme } from '@mui/material';
 import IndexPage from './pages/index.js';
 import ItemsTablePage from './pages/items/Table.js';
@@ -7,7 +7,7 @@ import LoginPage from './pages/auth/login.js';
 import RegisterPage from './pages/auth/register.js';
 import ProfilePage from './pages/auth/profile.js';
 import ItemsDetailsPage from './pages/items/Details.js';
-import YandexOAuthCallbackPage from './pages/auth/YandexOAuthCallbackPage.js'; // Add this import
+import YandexOAuthCallbackPage from './pages/auth/YandexOAuthCallbackPage.js';
 import CreateItemPage from './pages/items/Create.js';
 
 // Basic theme for Material UI
@@ -37,7 +37,7 @@ const theme = createTheme({
 function App() {
     return (
         <ThemeProvider theme={theme}>
-            <CssBaseline /> {/* Normalize CSS and apply background color from theme */}
+            <CssBaseline />
             <main>
                 <Routes>
                     <Route path="/" element={<IndexPage />} />
@@ -47,7 +47,9 @@ function App() {
                     <Route path="/profile" element={<ProfilePage />} />
                     <Route path="/items/create" element={<CreateItemPage />} />
                     <Route path="/items/:itemSerialNumber" element={<ItemsDetailsPage />} />
-                    <Route path="/auth/yandex/callback" element={<YandexOAuthCallbackPage />} /> {/* Add this route */}
+                    <Route path="/auth/yandex/callback" element={<YandexOAuthCallbackPage />} />
+                    {/* Catch-all route for handling 404s */}
+                    <Route path="*" element={<div>Page not found</div>} />
                 </Routes>
             </main>
         </ThemeProvider>

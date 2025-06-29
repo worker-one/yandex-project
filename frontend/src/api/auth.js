@@ -6,7 +6,7 @@ const USER_PROFILE_KEY = 'userProfile';
 
 // Yandex OAuth Configuration (replace with your actual credentials, ideally from env vars)
 const YANDEX_CLIENT_ID = '303d7df8e9d74b39961e89aa60fb4fae';
-const YANDEX_REDIRECT_URI = 'http://83.217.223.59:8001/auth/yandex/callback';
+const YANDEX_REDIRECT_URI = 'http://83.217.223.59:80/auth/yandex/callback';
 
 // Token handling functions
 export function saveTokens(accessToken, refreshToken) {
@@ -105,7 +105,7 @@ export async function handleYandexOAuthCallback(code) {
     try {
         console.log(`Processing Yandex OAuth code: ${code}`);
         
-        const response = await fetch('http://83.217.223.59:8000/api/v1/auth/yandex/callback', {
+        const response = await fetch('/api/v1/auth/yandex/callback', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
