@@ -13,7 +13,7 @@ const DEFAULT_ROWS_PER_PAGE = 20;
 const headCells = [
   { id: 'index', numeric: true, disablePadding: false, label: '#', sortable: false, align: 'center' },
   { id: 'name', numeric: false, disablePadding: false, label: 'Name', sortable: true, align: 'left' }, // Align left for better readability
-  { id: 'device_id', numeric: false, disablePadding: false, label: 'Device ID', sortable: true, align: 'left' },
+  { id: 'serial_number', numeric: false, disablePadding: false, label: 'Device ID', sortable: true, align: 'left' },
   { id: 'is_online', numeric: false, disablePadding: false, label: 'Status', sortable: true, align: 'center' },
   { id: 'last_seen', numeric: false, disablePadding: false, label: 'Last Seen', sortable: true, align: 'center' },
   { id: 'owner', numeric: false, disablePadding: false, label: 'Owner', sortable: true, align: 'left' }, // Sortable by owner name (if API supports)
@@ -109,7 +109,7 @@ const ItemsTable = ({ refreshTrigger }) => { // Add refreshTrigger to props
                     fontWeight: 'bold',
                     ...(headCell.id === 'index' && { width: '5%' }),
                     ...(headCell.id === 'name' && { width: '20%' }),
-                    ...(headCell.id === 'device_id' && { width: '20%' }),
+                    ...(headCell.id === 'serial_number' && { width: '20%' }),
                     ...(headCell.id === 'is_online' && { width: '10%' }),
                     ...(headCell.id === 'last_seen' && { width: '15%' }),
                     ...(headCell.id === 'owner' && { width: '15%' }),
@@ -164,7 +164,7 @@ const ItemsTable = ({ refreshTrigger }) => { // Add refreshTrigger to props
                     {/* Device ID */}
                     <TableCell align="left">
                       <Typography variant="body2">
-                        {item.device_id || 'N/A'}
+                        {item.serial_number || 'N/A'}
                       </Typography>
                     </TableCell>
 

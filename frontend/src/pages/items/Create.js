@@ -1,5 +1,5 @@
 import { Link as RouterLink } from 'react-router';
-import { Container, Typography, Breadcrumbs, Link } from '@mui/material';
+import { Box, Container, Typography, Breadcrumbs, Link } from '@mui/material';
 import CreateForm from '../../components/items/CreateForm';
 import Header from '../../components/common/Header';
 import Footer from '../../components/common/Footer';
@@ -14,7 +14,7 @@ const CreateItemPage = () => {
                         Home
                     </Link>
                     <Link component={RouterLink} underline="hover" color="inherit" to="/items">
-                        Items
+                        Devices
                     </Link>
                     <Typography color="text.primary">Create</Typography>
                 </Breadcrumbs>

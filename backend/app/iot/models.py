@@ -10,7 +10,7 @@ class Device(Base, TimeStampMixin):
     __tablename__ = 'devices'
 
     id = Column(Integer, primary_key=True, index=True)
-    device_id = Column(String(100), unique=True, nullable=False, index=True)
+    serial_number = Column(String(100), unique=True, nullable=False, index=True)
     name = Column(String(100), nullable=False)
     description = Column(Text)
     room = Column(String(100))
@@ -28,7 +28,7 @@ class DeviceInfo(Base, TimeStampMixin):
     model = Column(String(100))
     hw_version = Column(String(50))
     sw_version = Column(String(50))
-    device_id = Column(Integer, ForeignKey('devices.id'), nullable=False, unique=True)
+    serial_number = Column(Integer, ForeignKey('devices.id'), nullable=False, unique=True)
 
     device = relationship("Device", back_populates="device_info")
 
@@ -41,6 +41,6 @@ class Capability(Base, TimeStampMixin):
     retrievable = Column(Boolean, default=True)
     reportable = Column(Boolean, default=True)
     parameters = Column(JSON)
-    device_id = Column(Integer, ForeignKey('devices.id'), nullable=False)
+    serial_number = Column(Integer, ForeignKey('devices.id'), nullable=False)
 
     device = relationship("Device", back_populates="capabilities")

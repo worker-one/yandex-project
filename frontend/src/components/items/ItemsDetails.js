@@ -21,7 +21,7 @@ const ItemDetails = ({ item }) => {
                     <Paper variant="outlined" sx={{ p: 2, height: '100%' }}>
                         <Typography variant="h6" gutterBottom>Details</Typography>
                         <Typography variant="body2" sx={{ mb: 1 }}>
-                            Device ID: {item.device_id}
+                            Device ID: {item.serial_number}
                         </Typography>
                         <Typography variant="body2" sx={{ mb: 1 }}>
                             Position: {item.position}

@@ -21,19 +21,6 @@ class ItemService:
         logger.info(f"Item with id {item_id} {'found' if item else 'not found'}.")
         return item
 
-    def get_item_by_external_id(
-        self, db: Session, user_id: int, external_id: str, external_source: str
-    ) -> Optional[item_models.Item]:
-        """Retrieve a single item by its external ID, source, and user ID."""
-        logger.info(f"Retrieving item with external_id {external_id}, source {external_source} for user_id {user_id}.")
-        item = db.query(item_models.Item).filter(
-            item_models.Item.user_id == user_id,
-            item_models.Item.external_id == external_id,
-            item_models.Item.external_source == external_source
-        ).first()
-        logger.info(f"Item with external_id {external_id} {'found' if item else 'not found'}.")
-        return item
-
     def list_items(
         self,
         db: Session,
@@ -52,8 +39,8 @@ class ItemService:
         if filters:
             if filters.name is not None:
                 query = query.where(item_models.Item.name.ilike(f"%{filters.name}%"))
-            if filters.user_id is not None: # Changed from owner_id to user_id
-                query = query.where(item_models.Item.user_id == filters.user_id) # Changed to Item.user_id
+            if filters.user_id is not None:
+                query = query.where(item_models.Item.user_id == filters.user_id)
 
         # Sorting
         if sort:
@@ -69,14 +56,14 @@ class ItemService:
         query = query.options(*(options or []))
 
         # Count total
-        total_query = select(func.count(item_models.Item.id)) # Use func.count for efficiency
+        total_query = select(func.count(item_models.Item.id))
         if filters:
             if filters.name is not None:
                 total_query = total_query.where(item_models.Item.name.ilike(f"%{filters.name}%"))
-            if filters.user_id is not None: # Changed from owner_id to user_id
-                total_query = total_query.where(item_models.Item.user_id == filters.user_id) # Changed to Item.user_id
+            if filters.user_id is not None:
+                total_query = total_query.where(item_models.Item.user_id == filters.user_id)
         
-        total = db.scalar(total_query) # More efficient way to count
+        total = db.scalar(total_query)
 
         # Pagination
         query = query.offset(skip).limit(limit)
@@ -91,39 +78,10 @@ class ItemService:
             total=total
         )
 
-    def create_item(self, db: Session, item_in: item_schemas.ItemCreate, owner_id: Optional[int] = None) -> item_models.Item:
+    def create_item(self, db: Session, item_in: item_schemas.ItemCreate, owner_id: int) -> item_models.Item:
         """Create a new item."""
-        # Ensure user_id is set from owner_id (current_user.id from router), overriding any user_id in item_in
-        item_data = item_in.model_dump(exclude_unset=True) # Use exclude_unset=True
-        
-        effective_user_id = owner_id
-        if 'user_id' in item_data and item_data['user_id'] is not None: # Allow user_id from item_in if owner_id not present
-            effective_user_id = item_data['user_id']
-        
-        if effective_user_id is None:
-            raise ValueError("User ID must be provided either via owner_id or item_in.user_id")
-        
-        item_data['user_id'] = effective_user_id
-
-        # Check for existing item if external_id and external_source are provided
-        if item_in.external_id and item_in.external_source:
-            existing_item = self.get_item_by_external_id(
-                db,
-                user_id=effective_user_id,
-                external_id=item_in.external_id,
-                external_source=item_in.external_source
-            )
-            if existing_item:
-                logger.info(f"Item with external_id {item_in.external_id} and source {item_in.external_source} already exists for user {effective_user_id}. Returning existing item.")
-                # Optionally, update existing_item fields here if needed
-                # For now, just return the existing one
-                return existing_item
-        
-        # Ensure external_id and external_source are part of item_data if present in item_in
-        if item_in.external_id is not None:
-            item_data['external_id'] = item_in.external_id
-        if item_in.external_source is not None:
-            item_data['external_source'] = item_in.external_source
+        item_data = item_in.model_dump()
+        item_data['user_id'] = owner_id
 
         item = item_models.Item(**item_data)
         db.add(item)
@@ -133,7 +91,7 @@ class ItemService:
 
     def update_item(self, db: Session, item: item_models.Item, item_in: item_schemas.ItemUpdate) -> item_models.Item:
         """Update an existing item."""
-        for field, value in item_in.model_dump(exclude_unset=True).items(): # Changed dict to model_dump
+        for field, value in item_in.model_dump(exclude_unset=True).items():
             setattr(item, field, value)
         db.commit()
         db.refresh(item)

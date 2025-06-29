@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router';
-import { Box, TextField, Typography, Alert } from '@mui/material';
+import { Button, Box, CircularProgress, TextField, Typography, Alert } from '@mui/material';
 import { createItem } from '../../api/items';
 
 const CreateForm = () => {
@@ -75,6 +75,14 @@ const CreateForm = () => {
                 onChange={handleChange}
                 helperText="Enter the serial number of the device"
             />
+            <Button
+                type="submit"
+                variant="contained"
+                sx={{ mt: 3, mb: 2 }}
+                disabled={loading}
+            >
+                {loading ? <CircularProgress size={24} /> : 'Add Device'}
+            </Button>
         </Box>
     );
 };
