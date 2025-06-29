@@ -239,7 +239,7 @@ class AuthService:
             "code": code,
             "client_id": settings.YANDEX_CLIENT_ID,
             "client_secret": settings.YANDEX_CLIENT_SECRET,
-            # "redirect_uri": settings.YANDEX_REDIRECT_URI # Yandex might not require it here if already matched
+            "redirect_uri": settings.YANDEX_REDIRECT_URI # Yandex might not require it here if already matched
         }
         try:
             # Corrected to use self.YANDEX_TOKEN_URL

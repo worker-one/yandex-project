@@ -145,8 +145,8 @@ const ItemsTable = ({ refreshTrigger }) => { // Add refreshTrigger to props
                 return (
                   <TableRow
                     hover
-                    key={item.id}
-                    onClick={(event) => handleRowClick(event, item.id)}
+                    key={item.serial_number}
+                    onClick={(event) => handleRowClick(event, item.serial_number)}
                     sx={{ cursor: 'pointer' }}
                   >
                     {/* Index */}
@@ -194,7 +194,7 @@ const ItemsTable = ({ refreshTrigger }) => { // Add refreshTrigger to props
                     <TableCell align="center">
                       <Button
                         component={RouterLink}
-                        to={`/items/${item.id}`}
+                        to={`/items/${item.serial_number}`}
                         variant="outlined"
                         size="small"
                         onClick={(e) => e.stopPropagation()}
