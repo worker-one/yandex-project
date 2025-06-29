@@ -30,10 +30,7 @@ const ItemsTablePage = () => {
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <Header />
       <Container component="main" maxWidth="lg" sx={{ mt: 4, mb: 4, flexGrow: 1 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Typography variant="h4" component="h1">
-            My Items
-          </Typography>
+        {/* <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
           <Button
             variant="contained"
             color="primary"
@@ -43,7 +40,7 @@ const ItemsTablePage = () => {
           >
             {syncing ? 'Syncing...' : 'Sync Yandex Devices'}
           </Button>
-        </Box>
+        </Box> */}
         {syncError && <Alert severity="error" sx={{ mb: 2 }}>{syncError}</Alert>}
         {syncSuccess && <Alert severity="success" sx={{ mb: 2 }}>{syncSuccess}</Alert>}
         <ItemsTable refreshTrigger={refreshTrigger} />

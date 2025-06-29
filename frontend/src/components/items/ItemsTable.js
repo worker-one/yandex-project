@@ -13,7 +13,7 @@ const DEFAULT_ROWS_PER_PAGE = 20;
 const headCells = [
   { id: 'index', numeric: true, disablePadding: false, label: '#', sortable: false, align: 'center' },
   { id: 'name', numeric: false, disablePadding: false, label: 'Name', sortable: true, align: 'left' }, // Align left for better readability
-  { id: 'serial_number', numeric: false, disablePadding: false, label: 'Device ID', sortable: true, align: 'left' },
+  { id: 'serial_number', numeric: false, disablePadding: false, label: 'Serial Number', sortable: true, align: 'left' },
   { id: 'is_online', numeric: false, disablePadding: false, label: 'Status', sortable: true, align: 'center' },
   { id: 'last_seen', numeric: false, disablePadding: false, label: 'Last Seen', sortable: true, align: 'center' },
   { id: 'owner', numeric: false, disablePadding: false, label: 'Owner', sortable: true, align: 'left' }, // Sortable by owner name (if API supports)
