@@ -2,12 +2,13 @@ import React from 'react';
 import { Routes, Route } from 'react-router';
 import { CssBaseline, ThemeProvider, createTheme } from '@mui/material';
 import IndexPage from './pages/index.js';
-import ItemsTablePage from './pages/items/ItemsTablePage.js';
+import ItemsTablePage from './pages/items/Table.js';
 import LoginPage from './pages/auth/login.js';
 import RegisterPage from './pages/auth/register.js';
 import ProfilePage from './pages/auth/profile.js';
-import ItemsDetailsPage from './pages/items/ItemsDetailsPage.js';
+import ItemsDetailsPage from './pages/items/Details.js';
 import YandexOAuthCallbackPage from './pages/auth/YandexOAuthCallbackPage.js'; // Add this import
+import CreateItemPage from './pages/items/Create.js';
 
 // Basic theme for Material UI
 const theme = createTheme({
@@ -44,6 +45,7 @@ function App() {
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/register" element={<RegisterPage />} />
                     <Route path="/profile" element={<ProfilePage />} />
+                    <Route path="/items/create" element={<CreateItemPage />} />
                     <Route path="/items/:itemId" element={< ItemsDetailsPage />} />
                     <Route path="/auth/yandex/callback" element={<YandexOAuthCallbackPage />} /> {/* Add this route */}
                 </Routes>

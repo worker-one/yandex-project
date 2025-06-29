@@ -42,6 +42,17 @@ export async function fetchItems(params = {}) {
     return fetchApi(`/items/?${query}`, { method: 'GET' });
 }
 
+/**
+ * Creates a new item.
+ * @param {object} itemData - The data for the new item.
+ * @returns {Promise<object>} - The created item object.
+ */
+export async function createItem(itemData) {
+    return fetchApi('/items/', {
+        method: 'POST',
+        body: JSON.stringify(itemData),
+    }, true); // Requires authentication
+}
 
 /**
  * Calls the backend to sync Yandex IoT devices for the current user.

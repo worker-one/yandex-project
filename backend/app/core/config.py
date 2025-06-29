@@ -9,7 +9,7 @@ class Settings:
     YANDEX_CLIENT_SECRET: str = os.getenv("YANDEX_CLIENT_SECRET", "YOUR_YANDEX_CLIENT_SECRET")
     # This redirect URI must match the one configured in your Yandex App settings
     # and the one used by your frontend to initiate OAuth flow.
-    YANDEX_REDIRECT_URI: str = os.getenv("YANDEX_REDIRECT_URI", "http://localhost:3000/auth/yandex/callback")
+    YANDEX_REDIRECT_URI: str = os.getenv("YANDEX_REDIRECT_URI", "http://83.217.223.59:8001/auth/yandex/callback")
     YANDEX_IOT_API_BASE_URL: str = os.getenv("YANDEX_IOT_API_BASE_URL", "https://api.iot.yandex.net")
     # JWT settings (already used by your security.py, ensure they are here or accessible)
     SECRET_KEY: str = os.getenv("SECRET_KEY", "your-secret-key")

@@ -61,7 +61,7 @@ const Header = () => {
           </MuiLink>
 
           {/* Site Navigation (center) */}
-          <Box component="nav" className="site-nav" sx={{ display: 'flex', gap: 2, flexGrow: 1, justifyContent: 'center' }}> {/* Preserving original class */}
+          <Box component="nav" className="site-nav" sx={{ display: 'flex', ml: 4, gap: 4, flexGrow: 1, justifyContent: 'left' }}> {/* Preserving original class */}
             <Button
               component={NavLink}
               to="/items"
@@ -69,7 +69,7 @@ const Header = () => {
               className="nav-link" // Preserving original class, active state handled by NavLink
               style={activeLinkStyle}
             >
-              Items
+              My Devices
             </Button>
           </Box>
 
@@ -94,6 +94,15 @@ const Header = () => {
               </>
             ) : (
               <>
+                <Button
+                  component={RouterLink}
+                  to="/items/create"
+                  color="inherit"
+                  className="nav-link"
+                  id="nav-add-item-btn"
+                >
+                  Add Device
+                </Button>
                 <Button
                   component={RouterLink}
                   to="/profile" 
