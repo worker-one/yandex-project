@@ -44,7 +44,7 @@ app.include_router(api_router_v1, prefix=settings.API_V1_STR)
 
 
 # --- Root Endpoint ---
-@app.get("/", tags=["Root"])
+@app.get(f"{settings.API_V1_STR}/", tags=["Root"])
 async def read_root():
     """
     Root endpoint providing basic API information.
@@ -52,8 +52,8 @@ async def read_root():
     return {
         "message": f"Welcome to the {settings.PROJECT_NAME} API",
         "version": settings.PROJECT_VERSION,
-        "docs_url": "/docs",
-        "redoc_url": "/redoc"
+        "docs_url": f"{settings.API_V1_STR}/docs",
+        "redoc_url": f"{settings.API_V1_STR}/redoc"
         }
     
     
