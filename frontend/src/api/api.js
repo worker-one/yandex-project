@@ -46,7 +46,14 @@ export async function fetchApi(endpoint, options = {}, requiresAuth = false) {
                 errorData = { message: `HTTP error! status: ${response.status}` };
             }
             // Enhance error message if possible
-            const errorMessage = errorData?.detail?.[0]?.msg || errorData?.message || `HTTP error! status: ${response.status}`;
+            let errorMessage;
+            if (typeof errorData?.detail === 'string') {
+                errorMessage = errorData.detail;
+            } else if (Array.isArray(errorData?.detail) && errorData.detail[0]?.msg) {
+                errorMessage = errorData.detail[0].msg;
+            } else {
+                errorMessage = errorData?.message || `HTTP error! status: ${response.status}`;
+            }
             throw new Error(errorMessage);
         }
 
