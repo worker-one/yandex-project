@@ -14,7 +14,7 @@ router = APIRouter(
 )
 
 
-@router.get("/{device_serial_number}", response_model=device_schemas.DeviceRead)
+@router.get("/devices/{device_serial_number}", response_model=device_schemas.DeviceRead)
 async def get_device(
     device_serial_number: str,
     db: Session = Depends(get_db)
@@ -27,7 +27,7 @@ async def get_device(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Device not found")
     return device
 
-@router.put("/{device_serial_number}", response_model=device_schemas.DeviceRead)
+@router.put("/devices/{device_serial_number}", response_model=device_schemas.DeviceRead)
 async def update_device(
     device_serial_number: str,
     device_in: device_schemas.DeviceUpdate,
@@ -46,7 +46,7 @@ async def update_device(
     db.refresh(updated_device, attribute_names=["owner"])
     return updated_device
 
-@router.delete("/{device_serial_number}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/devices/{device_serial_number}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_device(
     device_serial_number: str,
     db: Session = Depends(get_db), 
@@ -64,7 +64,7 @@ async def delete_device(
     return None
 
 
-@router.get("/", response_model=device_schemas.DeviceListResponse)
+@router.get("/devices/", response_model=device_schemas.DeviceListResponse)
 async def list_devices(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
@@ -95,7 +95,7 @@ async def list_devices(
     )
     return devices
 
-@router.post("/", response_model=device_schemas.DeviceRead, status_code=status.HTTP_201_CREATED)
+@router.post("/devices/", response_model=device_schemas.DeviceRead, status_code=status.HTTP_201_CREATED)
 async def create_device(
     device_in: device_schemas.DeviceCreate,
     db: Session = Depends(get_db),
