@@ -11,8 +11,8 @@ from . import security
 from ..dependencies import get_current_active_user
 from .models import User
 from .. import schemas as common_schemas
-from ..devices import schemas as item_schemas # For response model
-from ..devices.service import item_service as global_item_service # Import the item_service instance
+from ..devices import schemas as device_schemas
+from ..devices.service import device_service as global_device_service
 
 router = APIRouter(
     prefix="/auth",
@@ -176,35 +176,34 @@ def handle_yandex_callback( # Changed to sync def as service and db ops are sync
     )
 
 # --- Yandex IoT Endpoints ---
-@router.post("/profile/yandex-iot/sync-devices", response_model=List[item_schemas.DeviceRead], status_code=status.HTTP_200_OK)
+@router.post("/profile/yandex-iot/sync-devices", response_model=List[device_schemas.DeviceRead], status_code=status.HTTP_200_OK)
 def sync_yandex_iot_devices_endpoint(
     current_user: CurrentUser,
     db: Session = Depends(get_db),
 ):
     """
-    Fetch devices from user's Yandex IoT account and sync them as items.
+    Fetch devices from user's Yandex IoT account and sync them as devices.
     """
-    if not current_user.yandex_oauth_access_token: # Check for the specific Yandex OAuth token
+    if not current_user.yandex_oauth_access_token:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Yandex account not linked or Yandex OAuth token not available. Please authenticate with Yandex first."
         )
     
     try:
-        # Pass the global_item_service instance to the auth_service method
-        synced_items = auth_service.sync_user_yandex_iot_devices(
+        # Pass the global_device_service instance to the auth_service method
+        synced_devices = auth_service.sync_user_yandex_iot_devices(
             db=db, 
             user=current_user, 
-            item_service_instance=global_item_service
+            device_service_instance=global_device_service
         )
-        return synced_items
+        return synced_devices
     except HTTPException as e:
-        # Re-raise HTTPExceptions from the service layer (e.g., token refresh failure, API errors)
         raise e
     except Exception as e:
-        # Log the error e
-        print(f"Unexpected error during Yandex IoT device sync: {e}") # Basic logging
+        print(f"Unexpected error during Yandex IoT device sync: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An unexpected error occurred during Yandex IoT device synchronization."
         )
+ 

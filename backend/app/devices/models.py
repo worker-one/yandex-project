@@ -6,7 +6,7 @@ from sqlalchemy.orm import relationship
 # Import Base from the central location
 from ..models import Base, TimeStampMixin
 
-class Item(Base, TimeStampMixin):
+class Device(Base, TimeStampMixin):
     """
     Generic base model for rankable items (Exchanges, Books, etc.).
     Uses joined table inheritance.

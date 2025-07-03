@@ -9,8 +9,8 @@ from datetime import datetime, timedelta # Add datetime, timedelta
 from . import models, schemas, security # Assuming security.py has get_password_hash
 from .models import User # Add User model import
 from ..core.config import settings # Import settings
-from ..devices import service as item_service_module # For type hinting and access to ItemService
-from ..devices import schemas as item_schemas # For creating item schemas
+from ..devices import service as device_service_module # For type hinting and access to ItemService
+from ..devices import schemas as device_schemas # For creating item schemas
 
 class AuthService:
 
@@ -190,13 +190,13 @@ class AuthService:
             )
 
     def sync_user_yandex_iot_devices(
-        self, db: Session, user: models.User, item_service_instance: item_service_module.ItemService
-    ) -> List[item_schemas.DeviceRead]:
-        """Fetches Yandex IoT devices for the user and syncs them as items."""
+        self, db: Session, user: models.User, device_service_instance: device_service_module.DeviceService
+    ) -> List[device_schemas.DeviceRead]:
+        """Fetches Yandex IoT devices for the user and syncs them as devices."""
         iot_user_info = self._fetch_yandex_iot_user_info(db, user)
         
         yandex_devices = iot_user_info.get("devices", [])
-        synced_items_pydantic = []
+        synced_devices_pydantic = []
 
         for device in yandex_devices:
             external_id = device.get("id")
@@ -211,25 +211,21 @@ class AuthService:
                 description_parts.append(f"Type: {device.get('type')}")
             description = ", ".join(description_parts) or "Yandex IoT Device"
 
-            item_create_schema = item_schemas.ItemCreate(
+            device_create_schema = device_schemas.DeviceCreate(
                 name=name,
-                description=description,
-                user_id=user.id, # Explicitly set user_id
-                external_id=external_id,
-                external_source="yandex_iot"
+                serial_number=external_id  # Use external_id as serial_number
             )
             
-            # create_item will check for existence and return existing or new
-            # owner_id is used by create_item to set user_id, but we've set it in schema
-            item_model = item_service_instance.create_item(
-                db=db, item_in=item_create_schema, owner_id=user.id 
+            # create_device will check for existence and return existing or new
+            device_model = device_service_instance.create_device(
+                db=db, device_in=device_create_schema, owner_id=user.id 
             )
-            db.refresh(item_model, attribute_names=["owner"]) # Ensure owner is loaded for DeviceRead
-            synced_items_pydantic.append(
-                item_schemas.DeviceRead.model_validate(item_model, from_attributes=True)
+            db.refresh(device_model, attribute_names=["owner"])
+            synced_devices_pydantic.append(
+                device_schemas.DeviceRead.model_validate(device_model, from_attributes=True)
             )
         
-        return synced_items_pydantic
+        return synced_devices_pydantic
 
     def process_yandex_oauth_callback(self, db: Session, code: str) -> models.User:
         # 1. Exchange authorization code for Yandex access token

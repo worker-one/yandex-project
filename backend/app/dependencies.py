@@ -4,7 +4,7 @@ from typing import Optional
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Session
 from jose import JWTError
 
 # import User model
@@ -14,8 +14,8 @@ from .database.core import get_db
 from .auth.security import decode_token
 from .auth.service import auth_service
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
-oauth2_scheme_optional = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login", auto_error=False) # For optional authentication
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
+oauth2_scheme_optional = OAuth2PasswordBearer(tokenUrl="/api/auth/login", auto_error=False) # For optional authentication
 
 # Add the missing type field to the TokenPayload model
 class TokenPayload(BaseModel):
@@ -25,7 +25,7 @@ class TokenPayload(BaseModel):
 
 async def get_current_user(
     token: str = Depends(oauth2_scheme),
-    db: AsyncSession = Depends(get_db)
+    db: Session = Depends(get_db)
 ):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -62,7 +62,7 @@ async def get_current_user(
 
 async def get_optional_current_active_user(
     token: Optional[str] = Depends(oauth2_scheme_optional), # Use the optional scheme
-    db: AsyncSession = Depends(get_db)
+    db: Session = Depends(get_db)
 ) -> Optional[User]:
     if not token:
         return None  # No token provided

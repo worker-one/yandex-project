@@ -16,7 +16,10 @@ else:
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.PROJECT_VERSION,
+    # swagger
+    docs_url=f"{settings.API_V1_STR}/docs",  # Customize Swagger UI path
     openapi_url=f"{settings.API_V1_STR}/openapi.json" # Customize OpenAPI path
+    
 )
 
 # --- Middleware ---

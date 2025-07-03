@@ -13,4 +13,4 @@ class User(Base, TimeStampMixin):
     is_superuser = Column(Boolean, default=False)
     # ...other fields...
 
-    items = relationship("Item", back_populates="owner")
+    devices = relationship("Device", back_populates="owner")
