@@ -5,9 +5,13 @@ from sqlalchemy.orm import Session, selectinload
 from app.database.core import get_db
 from app.devices import schemas as device_schemas
 from app.devices import service as device_service
+from app import schemas as common_schemas
+# auth_service
+from app.auth.service import auth_service
 from app.dependencies import get_current_active_user
 from app.auth.models import User
 from app.devices.models import Device
+
 
 router = APIRouter(
     tags=["Devices"]
@@ -142,3 +146,39 @@ async def query_user_devices(
     """
     devices = device_service.device_service.query_user_devices(db=db, user_id=current_user.id, filters=query)
     return devices
+
+# Change device status
+# POST https://example.com/v1.0/user/devices/action
+@router.post("/user/devices/action", response_model=device_schemas.DevicesListResponse)
+async def change_device_status(
+    #action: device_schemas.DeviceAction,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """
+    Change device status.
+    """
+    # Implement the logic to change device status based on the action
+    # This is a placeholder implementation
+    #devices = device_service.device_service.change_device_status(db=db, user_id=current_user.id, action=action)
+    # Mock implementation for demonstration
+    devices = device_service.device_service.get_user_devices(
+        db=db,
+        user_id=current_user.id,
+        options=[selectinload(Device.owner)]
+    )
+    return devices
+
+ 
+# Unlink account
+# POST https://example.com/v1.0/user/unlink
+@router.post("/user/unlink", response_model=common_schemas.Message, status_code=status.HTTP_200_OK)
+def unlink_account(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """
+    Unlink the user's Yandex account.
+    """
+    auth_service.unlink_yandex_account(db=db, user=current_user)
+    return common_schemas.Message(message="OK")
