@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link as RouterLink } from 'react-router';
 import { Container, Typography, CircularProgress, Link, Alert, Box, Button, Breadcrumbs } from '@mui/material';
 import ItemDetails from '../../components/items/ItemsDetails.js';
 // Assuming you have an API service for items
-import { getItemDetails } from '../../api/items.js'; // Adjust the path as necessary
+import { getDeviceDetails } from '../../api/items.js'; // Updated import
 import Header from '../../components/common/Header.js';
 import Footer from '../../components/common/Footer.js';
 
@@ -19,11 +19,11 @@ const ItemsDetailsPage = () => {
             try {
                 setLoading(true);
                 setError(null);
-                const data = await getItemDetails(itemSerialNumber); // Updated function call
+                const data = await getDeviceDetails(itemSerialNumber); // Updated function call
                 setItem(data);
             } catch (err) {
-                setError(err.message || 'Failed to fetch item details.');
-                console.error("Error fetching item details:", err);
+                setError(err.message || 'Failed to fetch device details.');
+                console.error("Error fetching device details:", err);
             } finally {
                 setLoading(false);
             }
@@ -46,7 +46,7 @@ const ItemsDetailsPage = () => {
         return (
             <Container sx={{ mt: 5 }}>
                 <Alert severity="error">{error}</Alert>
-                <Button component={RouterLink} to="/items" variant="outlined" sx={{ mt: 2 }}>
+                <Button component={RouterLink} to="/devices" variant="outlined" sx={{ mt: 2 }}>
                     Back to Devices
                 </Button>
             </Container>
@@ -56,8 +56,8 @@ const ItemsDetailsPage = () => {
     if (!item) {
         return (
             <Container sx={{ mt: 5 }}>
-                <Typography variant="h6">Item not found.</Typography>
-                <Button component={RouterLink} to="/items" variant="outlined" sx={{ mt: 2 }}>
+                <Typography variant="h6">Device not found.</Typography>
+                <Button component={RouterLink} to="/devices" variant="outlined" sx={{ mt: 2 }}>
                     Back to Devices
                 </Button>
             </Container>
@@ -66,7 +66,7 @@ const ItemsDetailsPage = () => {
 
     const breadcrumbLinks = [
         { name: 'Home', href: '/' },
-        { name: 'Items', href: '/items' },
+        { name: 'Devices', href: '/devices' },
         { name: item.name || 'Details' }, // Use item name if available, otherwise 'Details'
     ];
 
@@ -80,13 +80,13 @@ const ItemsDetailsPage = () => {
                         <Link component="button" onClick={() => navigate('/')} sx={{ display: 'flex', alignItems: 'center' }} color="inherit">
                             Home
                         </Link>
-                        <Link component="button" onClick={() => navigate('/items')} sx={{ display: 'flex', alignItems: 'center' }} color="inherit">
+                        <Link component="button" onClick={() => navigate('/devices')} sx={{ display: 'flex', alignItems: 'center' }} color="inherit">
                             Devices
                         </Link>
                         <Typography color="text.primary">{item.name}</Typography>
                     </Breadcrumbs>
 
-                    <Button component={RouterLink} to="/items" variant="outlined">
+                    <Button component={RouterLink} to="/devices" variant="outlined">
                         Back to my devices
                     </Button>
                 </Box>
