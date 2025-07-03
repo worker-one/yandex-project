@@ -1,15 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { Button, Box, CircularProgress, TextField, Typography, Alert } from '@mui/material';
-import { createItem } from '../../api/items';
+import { createDevice } from '../../api/items';
 
 const CreateForm = () => {
-    const [itemData, setItemData] = useState({
+    const [deviceData, setDeviceData] = useState({
         name: '',
-        slug: '',
-        description: '',
-        image_url: '',
-        website_url: '',
+        serial_number: '',
     });
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -17,7 +14,7 @@ const CreateForm = () => {
 
     const handleChange = (event) => {
         const { name, value } = event.target;
-        setItemData(prevState => ({
+        setDeviceData(prevState => ({
             ...prevState,
             [name]: value,
         }));
@@ -29,7 +26,7 @@ const CreateForm = () => {
         setError(null);
 
         // Filter out empty optional fields
-        const dataToSubmit = { ...itemData };
+        const dataToSubmit = { ...deviceData };
         for (const key in dataToSubmit) {
             if (dataToSubmit[key] === '') {
                 delete dataToSubmit[key];
@@ -37,10 +34,10 @@ const CreateForm = () => {
         }
 
         try {
-            const newItem = await createItem(dataToSubmit);
-            navigate(`/items/${newItem.serial_number}`);
+            const newDevice = await createDevice(dataToSubmit);
+            navigate(`/devices/${newDevice.serial_number}`);
         } catch (err) {
-            setError(err.message || 'An error occurred while creating the item.');
+            setError(err.message || 'An error occurred while creating the device.');
             console.error(err);
         } finally {
             setLoading(false);
@@ -58,20 +55,21 @@ const CreateForm = () => {
                 required
                 fullWidth
                 id="name"
-                label="Item Name"
+                label="Device Name"
                 name="name"
                 autoComplete="name"
                 autoFocus
-                value={itemData.name}
+                value={deviceData.name}
                 onChange={handleChange}
             />
             <TextField
                 margin="normal"
+                required
                 fullWidth
                 id="serial_number"
                 label="Serial Number"
                 name="serial_number"
-                value={itemData.serial_number}
+                value={deviceData.serial_number}
                 onChange={handleChange}
                 helperText="Enter the serial number of the device"
             />

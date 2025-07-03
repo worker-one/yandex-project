@@ -4,7 +4,7 @@ import {
   TableSortLabel, TablePagination, CircularProgress, Typography, Box, Button, Link as MuiLink, Chip // Added Chip
 } from '@mui/material';
 import { Link as RouterLink, useNavigate } from 'react-router';
-import { fetchItems as fetchItemsAPI } from '../../api/items'; // <-- Use API module
+import { fetchDevices as fetchDevicesAPI } from '../../api/items'; // <-- Use API module
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'; // For online status
 import CancelIcon from '@mui/icons-material/Cancel'; // For offline status
 
@@ -21,8 +21,8 @@ const headCells = [
 ];
 
 
-const ItemsTable = ({ refreshTrigger }) => { // Add refreshTrigger to props
-  const [items, setItems] = useState([]);
+const DevicesTable = ({ refreshTrigger }) => { // Add refreshTrigger to props
+  const [devices, setDevices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [order, setOrder] = useState('desc');
@@ -32,7 +32,7 @@ const ItemsTable = ({ refreshTrigger }) => { // Add refreshTrigger to props
   const [totalRows, setTotalRows] = useState(0);
   const navigate = useNavigate();
 
-  const fetchItems = useCallback(async () => {
+  const fetchDevices = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -45,12 +45,12 @@ const ItemsTable = ({ refreshTrigger }) => { // Add refreshTrigger to props
       // Remove undefined or null params
       Object.keys(params).forEach(key => (params[key] == null) && delete params[key]);
       
-      const data = await fetchItemsAPI(params); // Use imported API function
-      setItems(data.items || []);
+      const data = await fetchDevicesAPI(params); // Use imported API function
+      setDevices(data.devices || []);
       setTotalRows(data.total || 0);
     } catch (err) {
       setError(err.message);
-      setItems([]);
+      setDevices([]);
       setTotalRows(0);
     } finally {
       setLoading(false);
@@ -58,8 +58,8 @@ const ItemsTable = ({ refreshTrigger }) => { // Add refreshTrigger to props
   }, [order, orderBy, page, rowsPerPage]);
 
   useEffect(() => {
-    fetchItems();
-  }, [fetchItems, refreshTrigger]); // Add refreshTrigger to dependency array
+    fetchDevices();
+  }, [fetchDevices, refreshTrigger]); // Add refreshTrigger to dependency array
 
   const handleRequestSort = (property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -77,12 +77,12 @@ const ItemsTable = ({ refreshTrigger }) => { // Add refreshTrigger to props
     setPage(0); // Reset to first page on rows per page change
   };
 
-  const handleRowClick = (event, id) => {
+  const handleRowClick = (event, serialNumber) => {
     // Prevent navigation if the click was on a link or button inside the row
     if (event.target.closest('a, button')) {
       return;
     }
-    navigate(`/items/${id}`);
+    navigate(`/devices/${serialNumber}`);
   };
 
   if (loading) {
@@ -90,13 +90,13 @@ const ItemsTable = ({ refreshTrigger }) => { // Add refreshTrigger to props
   }
 
   if (error) {
-    return <Typography color="error" sx={{ p: 3 }}>Error loading items: {error}</Typography>;
+    return <Typography color="error" sx={{ p: 3 }}>Error loading devices: {error}</Typography>;
   }
 
   return (
     <Paper sx={{ width: '100%', mb: 2 }}>
       <TableContainer>
-        <Table stickyHeader aria-label="items table">
+        <Table stickyHeader aria-label="devices table">
           <TableHead>
             <TableRow>
               {headCells.map((headCell) => (
@@ -132,21 +132,21 @@ const ItemsTable = ({ refreshTrigger }) => { // Add refreshTrigger to props
             </TableRow>
           </TableHead>
           <TableBody>
-            {items.length === 0 ? (
+            {devices.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={headCells.length} align="center" sx={{ py: 3, color: 'text.secondary' }}>
-                  No items found.
+                  No devices found.
                 </TableCell>
               </TableRow>
             ) : (
-              items.map((item, index) => {
+              devices.map((device, index) => {
                 const startIndex = page * rowsPerPage;
                 
                 return (
                   <TableRow
                     hover
-                    key={item.serial_number}
-                    onClick={(event) => handleRowClick(event, item.serial_number)}
+                    key={device.serial_number}
+                    onClick={(event) => handleRowClick(event, device.serial_number)}
                     sx={{ cursor: 'pointer' }}
                   >
                     {/* Index */}
@@ -157,20 +157,20 @@ const ItemsTable = ({ refreshTrigger }) => { // Add refreshTrigger to props
                     {/* Name */}
                     <TableCell align="left">
                       <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
-                        {item.name || 'N/A'}
+                        {device.name || 'N/A'}
                       </Typography>
                     </TableCell>
 
-                    {/* Device ID */}
+                    {/* Device Serial Number */}
                     <TableCell align="left">
                       <Typography variant="body2">
-                        {item.serial_number || 'N/A'}
+                        {device.serial_number || 'N/A'}
                       </Typography>
                     </TableCell>
 
                     {/* Status (is_online) */}
                     <TableCell align="center">
-                      {item.is_online ? 
+                      {device.is_online ? 
                         <Chip icon={<CheckCircleIcon />} label="Online" color="success" size="small" variant="outlined" /> :
                         <Chip icon={<CancelIcon />} label="Offline" color="error" size="small" variant="outlined" />
                       }
@@ -179,14 +179,14 @@ const ItemsTable = ({ refreshTrigger }) => { // Add refreshTrigger to props
                     {/* Last Seen */}
                     <TableCell align="center">
                       <Typography variant="body2">
-                        {item.last_seen ? new Date(item.last_seen).toLocaleString() : 'N/A'}
+                        {device.last_seen ? new Date(device.last_seen).toLocaleString() : 'N/A'}
                       </Typography>
                     </TableCell>
                     
                     {/* Owner */}
                     <TableCell align="left">
-                        <MuiLink color='secondary' component={RouterLink} to={`/users/${item.owner?.id}`} onClick={(e) => e.stopPropagation()}> {/* Optional: Link to user profile page */}
-                          {item.owner?.name || item.owner?.email || 'N/A'}
+                        <MuiLink color='secondary' component={RouterLink} to={`/users/${device.owner?.id}`} onClick={(e) => e.stopPropagation()}> {/* Optional: Link to user profile page */}
+                          {device.owner?.name || device.owner?.email || 'N/A'}
                         </MuiLink>
                     </TableCell>
 
@@ -194,7 +194,7 @@ const ItemsTable = ({ refreshTrigger }) => { // Add refreshTrigger to props
                     <TableCell align="center">
                       <Button
                         component={RouterLink}
-                        to={`/items/${item.serial_number}`}
+                        to={`/devices/${device.serial_number}`}
                         variant="outlined"
                         size="small"
                         onClick={(e) => e.stopPropagation()}
@@ -225,4 +225,4 @@ const ItemsTable = ({ refreshTrigger }) => { // Add refreshTrigger to props
   );
 };
 
-export default ItemsTable;
+export default DevicesTable;

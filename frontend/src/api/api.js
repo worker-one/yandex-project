@@ -9,7 +9,7 @@ import { getAccessToken } from '../api/auth';
  * @returns {Promise<any>} - Resolves with the JSON response data or rejects with an error.
  */
 export async function fetchApi(endpoint, options = {}, requiresAuth = false) {
-    const url = `/api/v1${endpoint}`;
+    const url = `/api${endpoint}`;
     const defaultHeaders = {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
