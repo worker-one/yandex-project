@@ -104,8 +104,8 @@ export function redirectToYandexOAuth() {
 export async function handleYandexOAuthCallback(code) {
     try {
         console.log(`Processing Yandex OAuth code: ${code}`);
-        
-        const response = await fetch('/api/auth/yandex/callback', {
+
+        const response = await fetch('/api/v1.0/auth/yandex/callback', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -115,7 +115,7 @@ export async function handleYandexOAuthCallback(code) {
 
         // Log the raw response text for debugging
         const responseText = await response.text();
-        console.log("Raw response from /api/yandex/callback:", responseText);
+        console.log("Raw response from /api/v1.0/auth/yandex/callback:", responseText);
         console.log("Response status:", response.status);
         console.log("Response headers:", Object.fromEntries(response.headers.entries()));
 
