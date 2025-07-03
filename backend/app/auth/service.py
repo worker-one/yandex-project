@@ -9,9 +9,8 @@ from datetime import datetime, timedelta # Add datetime, timedelta
 from . import models, schemas, security # Assuming security.py has get_password_hash
 from .models import User # Add User model import
 from ..core.config import settings # Import settings
-from ..items import service as item_service_module # For type hinting and access to ItemService
-from ..items import schemas as item_schemas # For creating item schemas
-from ..items import models as item_models # For type hinting
+from ..devices import service as item_service_module # For type hinting and access to ItemService
+from ..devices import schemas as item_schemas # For creating item schemas
 
 class AuthService:
 
@@ -192,7 +191,7 @@ class AuthService:
 
     def sync_user_yandex_iot_devices(
         self, db: Session, user: models.User, item_service_instance: item_service_module.ItemService
-    ) -> List[item_schemas.ItemRead]:
+    ) -> List[item_schemas.DeviceRead]:
         """Fetches Yandex IoT devices for the user and syncs them as items."""
         iot_user_info = self._fetch_yandex_iot_user_info(db, user)
         
@@ -225,9 +224,9 @@ class AuthService:
             item_model = item_service_instance.create_item(
                 db=db, item_in=item_create_schema, owner_id=user.id 
             )
-            db.refresh(item_model, attribute_names=["owner"]) # Ensure owner is loaded for ItemRead
+            db.refresh(item_model, attribute_names=["owner"]) # Ensure owner is loaded for DeviceRead
             synced_items_pydantic.append(
-                item_schemas.ItemRead.model_validate(item_model, from_attributes=True)
+                item_schemas.DeviceRead.model_validate(item_model, from_attributes=True)
             )
         
         return synced_items_pydantic

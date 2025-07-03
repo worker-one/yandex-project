@@ -11,7 +11,7 @@ class Item(Base, TimeStampMixin):
     Generic base model for rankable items (Exchanges, Books, etc.).
     Uses joined table inheritance.
     """
-    __tablename__ = 'items'
+    __tablename__ = 'devices'
 
     id = Column(Integer, primary_key=True, index=True)
     serial_number = Column(String(100), unique=True, nullable=False)
@@ -21,6 +21,6 @@ class Item(Base, TimeStampMixin):
     # relationship fields
     owner = relationship(
         "User", 
-        back_populates="items",
+        back_populates="devices",
         foreign_keys=[user_id]
     )

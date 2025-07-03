@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
 from app.auth.router import router as auth_router
-from app.items.router import router as items_router
+from app.devices.router import router as devices_router
 
 if settings.ENVIRONMENT == "local":
     LOG_LEVEL = "debug"  # Set log level to debug for local development
@@ -38,7 +38,7 @@ app.add_middleware(
 # Include modular routers
 api_router_v1 = APIRouter() # Create a router for versioning
 api_router_v1.include_router(auth_router)
-api_router_v1.include_router(items_router)
+api_router_v1.include_router(devices_router)
 
 app.include_router(api_router_v1, prefix=settings.API_V1_STR)
 
@@ -47,7 +47,7 @@ app.include_router(api_router_v1, prefix=settings.API_V1_STR)
 @app.get(f"{settings.API_V1_STR}/", tags=["Root"])
 async def read_root():
     """
-    Root endpoint providing basic API information.
+    Root endpoint providing 200 OK response.
     """
     return {
         "message": f"Welcome to the {settings.PROJECT_NAME} API",

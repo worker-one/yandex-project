@@ -5,7 +5,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 
 from app.models import Base, TimeStampMixin
-from app.items.models import Item  # or use a string if circular import
+from app.devices.models import Item  # or use a string if circular import
 
 class User(Base, TimeStampMixin):
     """
@@ -26,8 +26,8 @@ class User(Base, TimeStampMixin):
     is_active = Column(Boolean, nullable=False, default=True) # Optional: If user blocking is needed
 
     # --- Relationships ---
-    # Items created by this user
-    items = relationship("Item", back_populates="owner")
+    # Devices created by this user
+    devices = relationship("Item", back_populates="owner")
 
     def __repr__(self):
         return f"<User(id={self.id}, email='{self.email}', name='{self.name}')>"

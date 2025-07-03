@@ -11,8 +11,8 @@ from . import security
 from ..dependencies import get_current_active_user
 from .models import User
 from .. import schemas as common_schemas
-from ..items import schemas as item_schemas # For response model
-from ..items.service import item_service as global_item_service # Import the item_service instance
+from ..devices import schemas as item_schemas # For response model
+from ..devices.service import item_service as global_item_service # Import the item_service instance
 
 router = APIRouter(
     prefix="/auth",
@@ -176,7 +176,7 @@ def handle_yandex_callback( # Changed to sync def as service and db ops are sync
     )
 
 # --- Yandex IoT Endpoints ---
-@router.post("/profile/yandex-iot/sync-devices", response_model=List[item_schemas.ItemRead], status_code=status.HTTP_200_OK)
+@router.post("/profile/yandex-iot/sync-devices", response_model=List[item_schemas.DeviceRead], status_code=status.HTTP_200_OK)
 def sync_yandex_iot_devices_endpoint(
     current_user: CurrentUser,
     db: Session = Depends(get_db),

@@ -2,18 +2,18 @@ from pydantic import BaseModel
 from typing import Optional
 from app.auth.schemas import UserRead
 
-class ItemBase(BaseModel):
+class DeviceBase(BaseModel):
     serial_number: str
     name: str
 
-class ItemCreate(ItemBase):
+class DeviceCreate(DeviceBase):
     pass
 
-class ItemUpdate(BaseModel):
+class DeviceUpdate(BaseModel):
     serial_number: Optional[str] = None
     name: Optional[str] = None
 
-class ItemRead(ItemBase):
+class DeviceRead(DeviceBase):
     id: int
     user_id: int
     owner: Optional[UserRead] = None
@@ -21,16 +21,16 @@ class ItemRead(ItemBase):
     class Config:
         orm_mode = True
 
-class ItemReadDetails(ItemRead):
+class DeviceReadDetails(DeviceRead):
     pass
 
 # --- Filtering and Sorting ---
 
-class ItemFilter(BaseModel):
+class DeviceFilter(BaseModel):
     name: Optional[str] = None
     user_id: Optional[int] = None
 
-class ItemSort(BaseModel):
+class DeviceSort(BaseModel):
     field: str
     direction: str  # 'asc' or 'desc'
 
@@ -42,8 +42,19 @@ class ItemSort(BaseModel):
             }
         }
 
-class ItemListResponse(BaseModel):
-    items: list[ItemRead]
+class DeviceListResponse(BaseModel):
+    devices: list[DeviceRead]
+    total: int
+
+    class Config:
+        orm_mode = True
+
+class DeviceQuery(BaseModel):
+    name: Optional[str] = None
+    user_id: Optional[int] = None
+
+class DevicesListResponse(BaseModel):
+    devices: list[DeviceRead]
     total: int
 
     class Config:
