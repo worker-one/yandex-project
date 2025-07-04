@@ -23,7 +23,7 @@ const YandexOAuthCallbackPage = () => {
 
             try {
                 // Send the code to your backend
-                const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:8000'}/api/v1.0/auth/yandex/callback?code=${code}&cid=${cid || ''}`, {
+                const response = await fetch(`/api/v1.0/auth/yandex/callback?code=${code}&cid=${cid || ''}`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
