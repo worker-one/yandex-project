@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router';
 import { Box, CircularProgress, Typography, Alert } from '@mui/material';
 import Header from '../../components/common/Header';
 import Footer from '../../components/common/Footer';
