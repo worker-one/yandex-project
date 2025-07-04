@@ -1,73 +1,109 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router'; // Fixed import
-import { handleYandexOAuthCallback } from '../../api/auth';
-import { Container, Typography, Box, CircularProgress, Alert } from '@mui/material';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { Box, CircularProgress, Typography, Alert } from '@mui/material';
 import Header from '../../components/common/Header';
 import Footer from '../../components/common/Footer';
 
 const YandexOAuthCallbackPage = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
+    const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const queryParams = new URLSearchParams(location.search);
-    const code = queryParams.get('code');
-    const error = queryParams.get('error');
+    useEffect(() => {
+        const handleOAuthCallback = async () => {
+            const code = searchParams.get('code');
+            const cid = searchParams.get('cid');
+            
+            if (!code) {
+                setError('Authorization code not found');
+                setLoading(false);
+                return;
+            }
 
-    // Handle OAuth error from Yandex
+            try {
+                // Send the code to your backend
+                const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:8000'}/api/v1.0/auth/yandex/callback?code=${code}&cid=${cid || ''}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to authenticate with Yandex');
+                }
+
+                const data = await response.json();
+                
+                // Store tokens in localStorage
+                localStorage.setItem('access_token', data.access_token);
+                localStorage.setItem('refresh_token', data.refresh_token);
+                localStorage.setItem('user_profile', JSON.stringify(data.user_profile));
+
+                // Redirect to profile page or dashboard
+                navigate('/profile', { replace: true });
+                
+            } catch (err) {
+                console.error('OAuth callback error:', err);
+                setError(err.message || 'Authentication failed');
+                setLoading(false);
+            }
+        };
+
+        handleOAuthCallback();
+    }, [searchParams, navigate]);
+
+    if (loading) {
+        return (
+            <Box 
+                display="flex" 
+                flexDirection="column" 
+                alignItems="center" 
+                justifyContent="center" 
+                minHeight="100vh"
+                gap={2}
+            >
+                <CircularProgress />
+                <Typography variant="h6">
+                    Completing Yandex authentication...
+                </Typography>
+            </Box>
+        );
+    }
+
     if (error) {
-      setError(`OAuth error: ${error}`);
-      setLoading(false);
-      setTimeout(() => navigate('/login?error=oauth_error'), 3000);
-      return;
+        return (
+            <Box 
+                display="flex" 
+                flexDirection="column" 
+                alignItems="center" 
+                justifyContent="center" 
+                minHeight="100vh"
+                gap={2}
+                padding={3}
+            >
+                <Alert severity="error" sx={{ maxWidth: 400 }}>
+                    <Typography variant="h6" gutterBottom>
+                        Authentication Failed
+                    </Typography>
+                    <Typography>
+                        {error}
+                    </Typography>
+                </Alert>
+                <Typography 
+                    variant="body2" 
+                    color="primary" 
+                    sx={{ cursor: 'pointer', textDecoration: 'underline' }}
+                    onClick={() => navigate('/login')}
+                >
+                    Return to login
+                </Typography>
+            </Box>
+        );
     }
 
-    if (code) {
-      handleYandexOAuthCallback(code)
-        .then(() => {
-          setLoading(false);
-          // Add explicit navigation if handleYandexOAuthCallback doesn't redirect
-          navigate('/');
-        })
-        .catch((err) => {
-          console.error('OAuth callback error:', err);
-          setError(err.message || 'Yandex OAuth failed. Please try again.');
-          setLoading(false);
-          setTimeout(() => navigate('/login?error=yandex_oauth_failed'), 3000);
-        });
-    } else {
-      setError('No authorization code found. Redirecting to login...');
-      setLoading(false);
-      setTimeout(() => navigate('/login'), 3000);
-    }
-  }, [location, navigate]);
-
-  return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <Header />
-      <Container component="main" maxWidth="xs" sx={{ mt: 8, mb: 4, flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-        {loading && (
-          <>
-            <CircularProgress sx={{ mb: 2 }} />
-            <Typography variant="h6">Processing Yandex Sign-In...</Typography>
-          </>
-        )}
-        {error && (
-          <Alert severity="error" sx={{ width: '100%', mt: 2 }}>
-            {error}
-          </Alert>
-        )}
-        {!loading && !error && (
-            <Alert severity="success" sx={{ width: '100%', mt: 2 }}>
-                Successfully processed. Redirecting...
-            </Alert>
-        )}
-      </Container>
-      <Footer />
-    </Box>
-  );
+    return null; // This shouldn't be reached
 };
 
 export default YandexOAuthCallbackPage;
