@@ -127,7 +127,7 @@ async def update_users_password( # Changed async async def to async def
     return common_schemas.Message(message="Password updated successfully")
 
 # --- Yandex OAuth Callback Endpoint ---
-@router.post("/yandex/callback", response_model=schemas.YandexCallbackResponseData)
+@router.get("/yandex/callback", response_model=schemas.YandexCallbackResponseData)
 def handle_yandex_callback( # Changed to sync def as service and db ops are sync
     payload: schemas.YandexOAuthCode, # Request body with the 'code'
     db: Session = Depends(get_db)
@@ -206,4 +206,3 @@ def sync_yandex_iot_devices_endpoint(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An unexpected error occurred during Yandex IoT device synchronization."
         )
- 
