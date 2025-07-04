@@ -128,8 +128,9 @@ async def update_users_password( # Changed async async def to async def
 
 # --- Yandex OAuth Callback Endpoint ---
 @router.get("/yandex/callback", response_model=schemas.YandexCallbackResponseData)
-def handle_yandex_callback( # Changed to sync def as service and db ops are sync
-    payload: schemas.YandexOAuthCode, # Request body with the 'code'
+async def handle_yandex_callback(
+    code: str,  # Query parameter
+    cid: str = None,  # Optional query parameter
     db: Session = Depends(get_db)
 ):
     """
@@ -140,7 +141,7 @@ def handle_yandex_callback( # Changed to sync def as service and db ops are sync
     try:
         # The service function will handle communication with Yandex,
         # find/create user, and return the local User object.
-        user = auth_service.process_yandex_oauth_callback(db=db, code=payload.code)
+        user = auth_service.process_yandex_oauth_callback(db=db, code=code)
     except HTTPException as e:
         # Re-raise HTTPExceptions from the service layer
         raise e
