@@ -42,7 +42,7 @@ const YandexOAuthCallbackPage = () => {
                 localStorage.setItem('user_profile', JSON.stringify(data.user_profile));
 
                 // Redirect to profile page or dashboard
-                navigate('/profile', { replace: true });
+                navigate('/items', { replace: true });
                 
             } catch (err) {
                 console.error('OAuth callback error:', err);
@@ -73,6 +73,11 @@ const YandexOAuthCallbackPage = () => {
     }
 
     if (error) {
+        console.error('OAuth error:', error);
+         // Optionally clear any stored tokens if authentication fails
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        localStorage.removeItem('user_profile');
         return (
             <Box 
                 display="flex" 
