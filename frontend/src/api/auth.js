@@ -5,7 +5,7 @@ const REFRESH_TOKEN_KEY = 'refreshToken';
 const USER_PROFILE_KEY = 'userProfile';
 
 // Yandex OAuth Configuration (replace with your actual credentials, ideally from env vars)
-const YANDEX_CLIENT_ID = 'd8e481a5c5b14b16b9abec82cc74d04e';
+const YANDEX_CLIENT_ID = '303d7df8e9d74b39961e89aa60fb4fae';
 const YANDEX_REDIRECT_URI = 'https://elkarobotics.com/auth/yandex/callback';
 
 // Token handling functions
