@@ -1,6 +1,7 @@
 services:
   db:
     image: postgres:13-alpine
+    restart: always
     volumes:
       - postgres_data:/var/lib/postgresql/data
     env_file:
@@ -26,9 +27,7 @@ services:
       DATABASE_URL: postgresql://${PG_USER}:${PG_PASSWORD}@db:5432/${PG_DB}
     depends_on:
       - db
-    # Optional: For development, you might want to mount your code
-    # volumes:
-    #   - ./backend:/app
+
 
   frontend:
     build:
