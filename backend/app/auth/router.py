@@ -1,5 +1,5 @@
 # app/auth/router.py
-from fastapi import APIRouter, Depends, HTTPException, status, Body
+from fastapi import APIRouter, Depends, HTTPException, status, Body, Query
 from sqlalchemy.orm import Session # Changed from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Annotated, List # Add List
 
@@ -208,3 +208,33 @@ def sync_yandex_iot_devices_endpoint(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An unexpected error occurred during Yandex IoT device synchronization."
         )
+
+@router.get("/authorize")
+def oauth_authorize_endpoint(
+    response_type: str = Query(..., description="OAuth response type, e.g., 'code'"),
+    client_id: str = Query(..., description="OAuth client ID"),
+    redirect_uri: str = Query(..., description="OAuth redirect URI"),
+    scope: str = Query("", description="OAuth scopes (space-separated)"),
+    state: str = Query(None, description="Opaque value for CSRF protection"),
+):
+    """
+    OAuth 2.0 Authorization Endpoint (RFC 6749 section 3.1).
+    This is where the user would authenticate and authorize the client.
+    """
+    # Validate response_type
+    if response_type != "code":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Unsupported response_type"
+        )
+    # TODO: Validate client_id, redirect_uri, and implement user consent/authentication
+
+    # For now, just echo the parameters (for debugging/demo)
+    return {
+        "message": "Authorization endpoint reached.",
+        "response_type": response_type,
+        "client_id": client_id,
+        "redirect_uri": redirect_uri,
+        "scope": scope,
+        "state": state,
+    }
