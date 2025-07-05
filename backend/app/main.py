@@ -46,18 +46,14 @@ api_router_v1.include_router(devices_router)
 app.include_router(api_router_v1, prefix=settings.API_V1_STR)
 
 
-# --- Root Endpoint ---
-@app.get(f"{settings.API_V1_STR}/", tags=["Root"])
-async def read_root():
+# Health check endpoint via HEAD
+@app.head(f"{settings.API_V1_STR}/", tags=["Health"])
+async def health_check():
     """
-    Root endpoint providing 200 OK response.
+    Health check endpoint to verify API is running.
+    Returns 200 OK response.
     """
-    return {
-        "message": f"Welcome to the {settings.PROJECT_NAME} API",
-        "version": settings.PROJECT_VERSION,
-        "docs_url": f"{settings.API_V1_STR}/docs",
-        "redoc_url": f"{settings.API_V1_STR}/redoc"
-        }
+    return {"status": "ok"}
     
     
 if __name__ == "__main__":

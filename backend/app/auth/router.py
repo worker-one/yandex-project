@@ -2,6 +2,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Body, Query
 from sqlalchemy.orm import Session # Changed from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Annotated, List # Add List
+from fastapi.responses import RedirectResponse
 
 from ..database.core import get_db
 
@@ -229,12 +230,13 @@ def oauth_authorize_endpoint(
         )
     # TODO: Validate client_id, redirect_uri, and implement user consent/authentication
 
-    # For now, just echo the parameters (for debugging/demo)
-    return {
-        "message": "Authorization endpoint reached.",
-        "response_type": response_type,
-        "client_id": client_id,
-        "redirect_uri": redirect_uri,
-        "scope": scope,
-        "state": state,
-    }
+    # Simulate successful authorization and generate a dummy code
+    dummy_code = "dummy_auth_code"
+    # Build redirect URL
+    from urllib.parse import urlencode
+
+    params = {"code": dummy_code}
+    if state:
+        params["state"] = state
+    redirect_url = f"{redirect_uri}?{urlencode(params)}"
+    return RedirectResponse(url=redirect_url)
