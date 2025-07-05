@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router';
 import { Box, CircularProgress, Typography, Alert } from '@mui/material';
 import Header from '../../components/common/Header';
 import Footer from '../../components/common/Footer';
+import { handleYandexOAuthCallback, clearAuthData } from '../../api/auth'; // Import shared logic
 
 const YandexOAuthCallbackPage = () => {
     const [searchParams] = useSearchParams();
@@ -22,28 +23,10 @@ const YandexOAuthCallbackPage = () => {
             }
 
             try {
-                // Send the code to your backend
-                const response = await fetch(`/api/v1.0/auth/yandex/callback?code=${code}&cid=${cid || ''}`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                });
-
-                if (!response.ok) {
-                    throw new Error('Failed to authenticate with Yandex');
-                }
-
-                const data = await response.json();
-                
-                // Store tokens in localStorage
-                localStorage.setItem('access_token', data.access_token);
-                localStorage.setItem('refresh_token', data.refresh_token);
-                localStorage.setItem('user_profile', JSON.stringify(data.user_profile));
-
-                // Redirect to profile page or dashboard
-                navigate('/items', { replace: true });
-                
+                // Use shared API logic to process Yandex OAuth callback and store tokens/profile
+                await handleYandexOAuthCallback(code);
+                // Redirect to home/dashboard after successful login
+                navigate('/', { replace: true });
             } catch (err) {
                 console.error('OAuth callback error:', err);
                 setError(err.message || 'Authentication failed');
@@ -74,10 +57,7 @@ const YandexOAuthCallbackPage = () => {
 
     if (error) {
         console.error('OAuth error:', error);
-         // Optionally clear any stored tokens if authentication fails
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
-        localStorage.removeItem('user_profile');
+        clearAuthData(); // Use shared logout logic
         return (
             <Box 
                 display="flex" 

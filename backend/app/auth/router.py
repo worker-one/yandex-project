@@ -127,47 +127,43 @@ async def update_users_password( # Changed async async def to async def
     return common_schemas.Message(message="Password updated successfully")
 
 # --- Yandex OAuth Callback Endpoint ---
-@router.get("/yandex/callback", response_model=schemas.YandexCallbackResponseData)
+@router.post("/yandex/callback", response_model=schemas.YandexCallbackResponseData)
 async def handle_yandex_callback(
-    code: str,  # Query parameter
-    cid: str = None,  # Optional query parameter
+    data: dict = Body(...),  # Accept JSON body
     db: Session = Depends(get_db)
 ):
     """
     Handle Yandex OAuth callback.
     Exchanges Yandex code for Yandex token, fetches Yandex user info,
     finds or creates a local user, and returns app-specific tokens and user profile.
+    The frontend should use these tokens to log the user in.
     """
+    code = data.get("code")
+    if not code:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Missing Yandex OAuth code."
+        )
     try:
-        # The service function will handle communication with Yandex,
-        # find/create user, and return the local User object.
         user = auth_service.process_yandex_oauth_callback(db=db, code=code)
     except HTTPException as e:
-        # Re-raise HTTPExceptions from the service layer
         raise e
     except Exception as e:
-        # Catch any other unexpected errors
-        # Log the error e
         print(f"Unexpected error in Yandex callback: {e}") # Basic logging
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An unexpected error occurred during Yandex authentication."
         )
 
-    if not user: # Should not happen if service layer raises HTTPException on failure
+    if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not authenticate with Yandex."
         )
 
-    # Generate your application's access and refresh tokens
     app_access_token = security.create_access_token(subject=user.id)
     app_refresh_token = security.create_refresh_token(subject=user.id)
-
-    # Prepare user profile data (UserRead schema should handle this)
-    user_profile = schemas.UserRead.from_orm(user) # Pydantic v1
-    # user_profile = schemas.UserRead.model_validate(user) # Pydantic v2
-    
+    user_profile = schemas.UserRead.from_orm(user)
     print(f"Yandex OAuth successful for user: {user.email}")
 
     return schemas.YandexCallbackResponseData(
@@ -202,6 +198,11 @@ def sync_yandex_iot_devices_endpoint(
     except HTTPException as e:
         raise e
     except Exception as e:
+        print(f"Unexpected error during Yandex IoT device sync: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred during Yandex IoT device synchronization."
+        )
         print(f"Unexpected error during Yandex IoT device sync: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
