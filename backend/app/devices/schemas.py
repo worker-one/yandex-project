@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Any, Dict, List, Optional
 from app.auth.schemas import UserRead
 
 class DeviceBase(BaseModel):
@@ -59,3 +59,32 @@ class DevicesListResponse(BaseModel):
 
     class Config:
         orm_mode = True
+
+class DeviceStatusInfo(BaseModel):
+    reportable: bool
+
+class DeviceInfo(BaseModel):
+    manufacturer: str
+    model: str
+    hw_version: str
+    sw_version: str
+
+class DevicePayloadDevice(BaseModel):
+    id: str
+    name: str
+    status_info: DeviceStatusInfo
+    description: str
+    room: str
+    type: str
+    custom_data: Dict[str, Any]
+    capabilities: Dict[str, Any]
+    properties: Dict[str, Any]
+    device_info: DeviceInfo
+
+class UserDevicesPayload(BaseModel):
+    user_id: str
+    devices: List[DevicePayloadDevice]
+
+class UserDevicesResponse(BaseModel):
+    request_id: str
+    payload: UserDevicesPayload

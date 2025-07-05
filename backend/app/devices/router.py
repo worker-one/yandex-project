@@ -1,6 +1,7 @@
 # app/devices/router.py
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session, selectinload
+import uuid
 
 from app.database.core import get_db
 from app.devices import schemas as device_schemas
@@ -114,7 +115,7 @@ async def create_device(
 
 # Get user's devices list
 # GET https://example.com/v1.0/user/devices
-@router.get("/user/devices", response_model=device_schemas.DevicesListResponse)
+@router.get("/user/devices", response_model=device_schemas.UserDevicesResponse)
 async def get_user_devices(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
@@ -124,14 +125,41 @@ async def get_user_devices(
     """
     Get user's devices with pagination.
     """
-    devices = device_service.device_service.get_user_devices(
+    devices_result = device_service.device_service.get_user_devices(
         db=db,
         user_id=current_user.id,
         skip=skip,
         limit=limit,
         options=[selectinload(Device.owner)]
     )
-    return devices
+    # Transform devices to required format
+    def device_to_payload(device):
+        return device_schemas.DevicePayloadDevice(
+            id=str(device.id),
+            name=device.name,
+            status_info=device_schemas.DeviceStatusInfo(reportable=True),
+            description=f"Device {device.name}",
+            room="",
+            type="other",
+            custom_data={},
+            capabilities={},
+            properties={},
+            device_info=device_schemas.DeviceInfo(
+                manufacturer="Unknown",
+                model="Unknown",
+                hw_version="1.0",
+                sw_version="1.0"
+            )
+        )
+    payload_devices = [device_to_payload(d) for d in devices_result.devices]
+    response = device_schemas.UserDevicesResponse(
+        request_id=str(uuid.uuid4()),
+        payload=device_schemas.UserDevicesPayload(
+            user_id=str(current_user.id),
+            devices=payload_devices
+        )
+    )
+    return response
 
 # Get user's devices status with query parameters
 # POST https://example.com/v1.0/user/devices/query
