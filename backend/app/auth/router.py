@@ -1,5 +1,5 @@
 # app/auth/router.py
-from fastapi import APIRouter, Depends, HTTPException, status, Body, Query
+from fastapi import APIRouter, Depends, HTTPException, status, Body, Query, Form
 from sqlalchemy.orm import Session # Changed from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Annotated, List # Add List
 from fastapi.responses import RedirectResponse
@@ -240,3 +240,46 @@ def oauth_authorize_endpoint(
         params["state"] = state
     redirect_url = f"{redirect_uri}?{urlencode(params)}"
     return RedirectResponse(url=redirect_url)
+
+@router.post("/token")
+async def oauth_token_endpoint(
+    grant_type: str = Form(..., description="OAuth grant type, e.g., 'authorization_code'"),
+    code: str = Form(..., description="The authorization code received from the /authorize endpoint"),
+    redirect_uri: str = Form(..., description="The redirect URI used in the authorization request"),
+    client_id: str = Form(..., description="The client ID"),
+    db: Session = Depends(get_db),
+):
+    """
+    OAuth 2.0 Token Endpoint (RFC 6749 section 3.2).
+    Exchanges authorization code for access token.
+    """
+    # Only support authorization_code grant type for now
+    if grant_type != "authorization_code":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Unsupported grant_type"
+        )
+    # Dummy code validation (replace with real lookup/validation)
+    if code != "dummy_auth_code":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired authorization code"
+        )
+    # TODO: Validate client_id, redirect_uri, and associate code with user
+
+    # Simulate user lookup (replace with real user retrieval)
+    user = auth_service.get_user_by_id(db=db, user_id=1)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User not found"
+        )
+
+    access_token = security.create_access_token(subject=user.id)
+    refresh_token = security.create_refresh_token(subject=user.id)
+
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "refresh_token": refresh_token,
+    }
