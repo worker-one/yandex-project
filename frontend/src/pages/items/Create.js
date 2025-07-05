@@ -13,7 +13,7 @@ const CreateItemPage = () => {
                     <Link component={RouterLink} underline="hover" color="inherit" to="/">
                         Home
                     </Link>
-                    <Link component={RouterLink} underline="hover" color="inherit" to="/items">
+                    <Link component={RouterLink} underline="hover" color="inherit" to="/devices">
                         Devices
                     </Link>
                     <Typography color="text.primary">Create</Typography>

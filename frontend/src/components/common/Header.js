@@ -64,7 +64,7 @@ const Header = () => {
           <Box component="nav" className="site-nav" sx={{ display: 'flex', ml: 4, gap: 4, flexGrow: 1, justifyContent: 'left' }}> {/* Preserving original class */}
             <Button
               component={NavLink}
-              to="/items"
+              to="/devices" // Changed to /devices to match the new route
               color="inherit"
               className="nav-link" // Preserving original class, active state handled by NavLink
               style={activeLinkStyle}
@@ -96,7 +96,7 @@ const Header = () => {
               <>
                 <Button
                   component={RouterLink}
-                  to="/items/create"
+                  to="/devices/create"
                   color="inherit"
                   className="nav-link"
                   id="nav-add-item-btn"
