@@ -87,7 +87,15 @@ export async function deleteDevice(deviceSerialNumber) {
  */
 export async function getUserDevices(params = { skip: 0, limit: 100 }) {
     const query = new URLSearchParams(params).toString();
-    return fetchApi(`/user/devices?${query}`, { method: 'GET' }, true);
+    const response = await fetchApi(`/user/devices?${query}`, { method: 'GET' }, true);
+    // Adjust for new backend response format
+    if (response && response.payload && Array.isArray(response.payload.devices)) {
+        return {
+            devices: response.payload.devices,
+            total: response.payload.devices.length // No explicit total in new format, so use length
+        };
+    }
+    return { devices: [], total: 0 };
 }
 
 /**

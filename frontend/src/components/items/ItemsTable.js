@@ -1,23 +1,20 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
-  TableSortLabel, TablePagination, CircularProgress, Typography, Box, Button, Link as MuiLink, Chip // Added Chip
+  TableSortLabel, TablePagination, CircularProgress, Typography, Box, Button, Link as MuiLink // Removed Chip
 } from '@mui/material';
 import { Link as RouterLink, useNavigate } from 'react-router';
 import { getUserDevices as fetchUserDevicesAPI } from '../../api/devices'; // Use correct API function
-import CheckCircleIcon from '@mui/icons-material/CheckCircle'; // For online status
-import CancelIcon from '@mui/icons-material/Cancel'; // For offline status
 
 const DEFAULT_ROWS_PER_PAGE = 20;
 
 const headCells = [
   { id: 'index', numeric: true, disablePadding: false, label: '#', sortable: false, align: 'center' },
-  { id: 'name', numeric: false, disablePadding: false, label: 'Name', sortable: true, align: 'left' }, // Align left for better readability
-  { id: 'serial_number', numeric: false, disablePadding: false, label: 'Serial Number', sortable: true, align: 'left' },
-  { id: 'is_online', numeric: false, disablePadding: false, label: 'Status', sortable: true, align: 'center' },
-  { id: 'last_seen', numeric: false, disablePadding: false, label: 'Last Seen', sortable: true, align: 'center' },
-  { id: 'owner', numeric: false, disablePadding: false, label: 'Owner', sortable: true, align: 'left' }, // Sortable by owner name (if API supports)
-  { id: 'actions', numeric: false, disablePadding: false, label: 'Actions', sortable: false, align: 'center' }, // Changed label to 'Actions'
+  { id: 'name', numeric: false, disablePadding: false, label: 'Name', sortable: true, align: 'left' },
+  { id: 'id', numeric: false, disablePadding: false, label: 'Device ID', sortable: true, align: 'left' },
+  { id: 'type', numeric: false, disablePadding: false, label: 'Type', sortable: false, align: 'left' },
+  { id: 'description', numeric: false, disablePadding: false, label: 'Description', sortable: false, align: 'left' },
+  { id: 'actions', numeric: false, disablePadding: false, label: 'Actions', sortable: false, align: 'center' },
 ];
 
 
@@ -107,10 +104,9 @@ const DevicesTable = ({ refreshTrigger }) => { // Add refreshTrigger to props
                     fontWeight: 'bold',
                     ...(headCell.id === 'index' && { width: '5%' }),
                     ...(headCell.id === 'name' && { width: '20%' }),
-                    ...(headCell.id === 'serial_number' && { width: '20%' }),
-                    ...(headCell.id === 'is_online' && { width: '10%' }),
-                    ...(headCell.id === 'last_seen' && { width: '15%' }),
-                    ...(headCell.id === 'owner' && { width: '15%' }),
+                    ...(headCell.id === 'id' && { width: '20%' }),
+                    ...(headCell.id === 'type' && { width: '20%' }),
+                    ...(headCell.id === 'description' && { width: '20%' }),
                     ...(headCell.id === 'actions' && { width: '15%' })
                   }}
                 >
@@ -139,12 +135,11 @@ const DevicesTable = ({ refreshTrigger }) => { // Add refreshTrigger to props
             ) : (
               devices.map((device, index) => {
                 const startIndex = page * rowsPerPage;
-                
                 return (
                   <TableRow
                     hover
-                    key={device.serial_number}
-                    onClick={(event) => handleRowClick(event, device.serial_number)}
+                    key={device.id}
+                    onClick={(event) => handleRowClick(event, device.id)}
                     sx={{ cursor: 'pointer' }}
                   >
                     {/* Index */}
@@ -159,40 +154,32 @@ const DevicesTable = ({ refreshTrigger }) => { // Add refreshTrigger to props
                       </Typography>
                     </TableCell>
 
-                    {/* Device Serial Number */}
+                    {/* Device ID */}
                     <TableCell align="left">
                       <Typography variant="body2">
-                        {device.serial_number || 'N/A'}
+                        {device.id || 'N/A'}
                       </Typography>
                     </TableCell>
 
-                    {/* Status (is_online) */}
-                    <TableCell align="center">
-                      {device.is_online ? 
-                        <Chip icon={<CheckCircleIcon />} label="Online" color="success" size="small" variant="outlined" /> :
-                        <Chip icon={<CancelIcon />} label="Offline" color="error" size="small" variant="outlined" />
-                      }
-                    </TableCell>
-
-                    {/* Last Seen */}
-                    <TableCell align="center">
+                    {/* Type */}
+                    <TableCell align="left">
                       <Typography variant="body2">
-                        {device.last_seen ? new Date(device.last_seen).toLocaleString() : 'N/A'}
+                        {device.type || 'N/A'}
                       </Typography>
                     </TableCell>
-                    
-                    {/* Owner */}
+
+                    {/* Description */}
                     <TableCell align="left">
-                        <MuiLink color='secondary' component={RouterLink} to={`/users/${device.owner?.id}`} onClick={(e) => e.stopPropagation()}> {/* Optional: Link to user profile page */}
-                          {device.owner?.name || device.owner?.email || 'N/A'}
-                        </MuiLink>
+                      <Typography variant="body2">
+                        {device.description || 'N/A'}
+                      </Typography>
                     </TableCell>
 
                     {/* Actions */}
                     <TableCell align="center">
                       <Button
                         component={RouterLink}
-                        to={`/devices/${device.serial_number}`}
+                        to={`/devices/${device.id}`}
                         variant="outlined"
                         size="small"
                         onClick={(e) => e.stopPropagation()}
