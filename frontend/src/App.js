@@ -41,12 +41,12 @@ function App() {
             <main>
                 <Routes>
                     <Route path="/" element={<IndexPage />} />
-                    <Route path="/items" element={<ItemsTablePage />} />
+                    <Route path="/devices" element={<ItemsTablePage />} />
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/register" element={<RegisterPage />} />
                     <Route path="/profile" element={<ProfilePage />} />
-                    <Route path="/items/create" element={<CreateItemPage />} />
-                    <Route path="/items/:itemSerialNumber" element={<ItemsDetailsPage />} />
+                    <Route path="/devices/create" element={<CreateItemPage />} />
+                    <Route path="/devices/:itemSerialNumber" element={<ItemsDetailsPage />} />
                     <Route path="/auth/yandex/callback" element={<YandexOAuthCallbackPage />} />
                     {/* Catch-all route for handling 404s */}
                     <Route path="*" element={<div>Page not found</div>} />

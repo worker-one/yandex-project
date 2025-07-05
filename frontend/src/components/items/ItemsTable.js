@@ -4,7 +4,7 @@ import {
   TableSortLabel, TablePagination, CircularProgress, Typography, Box, Button, Link as MuiLink, Chip // Added Chip
 } from '@mui/material';
 import { Link as RouterLink, useNavigate } from 'react-router';
-import { fetchDevices as fetchDevicesAPI } from '../../api/items'; // <-- Use API module
+import { getUserDevices as fetchUserDevicesAPI } from '../../api/devices'; // Use correct API function
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'; // For online status
 import CancelIcon from '@mui/icons-material/Cancel'; // For offline status
 
@@ -37,15 +37,13 @@ const DevicesTable = ({ refreshTrigger }) => { // Add refreshTrigger to props
     setError(null);
     try {
       const params = {
-        field: orderBy === 'owner' ? 'owner.name' : orderBy, // Adjust if API sorts by nested field differently
-        direction: order,
+        skip: page * rowsPerPage,
         limit: rowsPerPage,
-        page: page + 1, // API is 1-indexed
+        // Filtering and sorting for user devices endpoint is limited; ignore sort for now
       };
       // Remove undefined or null params
       Object.keys(params).forEach(key => (params[key] == null) && delete params[key]);
-      
-      const data = await fetchDevicesAPI(params); // Use imported API function
+      const data = await fetchUserDevicesAPI(params); // Use imported API function
       setDevices(data.devices || []);
       setTotalRows(data.total || 0);
     } catch (err) {
@@ -55,7 +53,7 @@ const DevicesTable = ({ refreshTrigger }) => { // Add refreshTrigger to props
     } finally {
       setLoading(false);
     }
-  }, [order, orderBy, page, rowsPerPage]);
+  }, [page, rowsPerPage]);
 
   useEffect(() => {
     fetchDevices();
