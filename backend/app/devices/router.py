@@ -147,6 +147,7 @@ async def get_user_devices(
             device_info=device_schemas.DeviceInfo(
                 manufacturer="Unknown",
                 model="Unknown",
+                serial_number=device.serial_number,  # <-- Add this line
                 hw_version="1.0",
                 sw_version="1.0"
             )
