@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { Button, Box, CircularProgress, TextField, Typography, Alert } from '@mui/material';
-import { createDevice } from '../../api/items';
+import { createDevice } from '../../api/devices';
 
 const CreateForm = () => {
     const [deviceData, setDeviceData] = useState({
@@ -69,7 +69,7 @@ const CreateForm = () => {
                 id="serial_number"
                 label="Serial Number"
                 name="serial_number"
-                value={deviceData.custom_data.serial_number}
+                value={deviceData.serial_number} // Fixed binding
                 onChange={handleChange}
                 helperText="Enter the serial number of the device"
             />

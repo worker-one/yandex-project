@@ -4,12 +4,14 @@ from app.auth.schemas import UserRead
 
 class DeviceBase(BaseModel):
     name: str
+    serial_number: str  # Added
 
 class DeviceCreate(DeviceBase):
     pass
 
 class DeviceUpdate(BaseModel):
     name: Optional[str] = None
+    serial_number: Optional[str] = None  # Added
 
 class DeviceRead(DeviceBase):
     id: int
