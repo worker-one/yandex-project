@@ -46,7 +46,7 @@ const DevicesTable = ({ refreshTrigger }) => { // Add refreshTrigger to props
       const devicesArray = data.payload?.devices || [];
       const mappedDevices = devicesArray.map(device => ({
         id: device.id,
-        serial_number: device.device_info?.serial_number || device.custom_data.serial_number || '', // fallback if missing
+        serial_number: device.device_info?.serial_number || device.custom_data?.serial_number || '', // safe access
         name: device.name,
         description: device.description,
         type: device.type,
@@ -169,7 +169,7 @@ const DevicesTable = ({ refreshTrigger }) => { // Add refreshTrigger to props
                     {/* Serial Number */}
                     <TableCell align="left">
                       <Typography variant="body2">
-                        {device.device_info?.serial_number || device.custom_data.serial_number || 'N/A'}
+                        {device.device_info?.serial_number || device.custom_data?.serial_number || 'N/A'}
                       </Typography>
                     </TableCell>
 
