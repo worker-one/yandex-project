@@ -88,3 +88,18 @@ class UserDevicesPayload(BaseModel):
 class UserDevicesResponse(BaseModel):
     request_id: str
     payload: UserDevicesPayload
+
+class DeviceActionCapability(BaseModel):
+    type: str
+    state: Optional[dict] = None
+
+class DeviceActionDevice(BaseModel):
+    id: str
+    custom_data: Dict[str, Any]
+    capabilities: List[DeviceActionCapability]
+
+class UserDevicesActionPayload(BaseModel):
+    devices: List[DeviceActionDevice]
+
+class UserDevicesActionResponse(BaseModel):
+    payload: UserDevicesActionPayload

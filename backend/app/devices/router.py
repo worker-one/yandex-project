@@ -181,7 +181,7 @@ async def query_user_devices(
 
 # Change device status
 # POST https://example.com/v1.0/user/devices/action
-@router.post("/user/devices/action", response_model=device_schemas.DevicesListResponse)
+@router.post("/user/devices/action", response_model=device_schemas.UserDevicesActionResponse)
 async def change_device_status(
     #action: device_schemas.DeviceAction,
     db: Session = Depends(get_db),
@@ -190,16 +190,32 @@ async def change_device_status(
     """
     Change device status.
     """
-    # Implement the logic to change device status based on the action
-    # This is a placeholder implementation
-    #devices = device_service.device_service.change_device_status(db=db, user_id=current_user.id, action=action)
     # Mock implementation for demonstration
-    devices = device_service.device_service.get_user_devices(
+    devices_result = device_service.device_service.get_user_devices(
         db=db,
         user_id=current_user.id,
         options=[selectinload(Device.owner)]
     )
-    return devices
+
+    def device_to_action_payload(device):
+        return device_schemas.DeviceActionDevice(
+            id=str(device.id),
+            custom_data={},
+            capabilities=[
+                device_schemas.DeviceActionCapability(
+                    type="devices.capabilities.on_off",
+                    state={"instance": "on", "action_result": {"status": "DONE"}}
+                )
+            ]
+        )
+
+    payload_devices = [device_to_action_payload(d) for d in devices_result.devices]
+    response = device_schemas.UserDevicesActionResponse(
+        payload=device_schemas.UserDevicesActionPayload(
+            devices=payload_devices
+        )
+    )
+    return response
 
  
 # Unlink account
