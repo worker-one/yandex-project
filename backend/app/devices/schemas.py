@@ -17,7 +17,7 @@ class DeviceRead(DeviceBase):
     id: int
     user_id: int
     owner: Optional[UserRead] = None
-    room : Optional[str] = None
+    room : Optional[str] = "main"
     type: Optional[str] = "devices.type.openable"
 
     class Config:

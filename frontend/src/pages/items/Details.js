@@ -8,7 +8,7 @@ import Header from '../../components/common/Header.js';
 import Footer from '../../components/common/Footer.js';
 
 const ItemsDetailsPage = () => {
-    const { itemSerialNumber } = useParams();
+    const { itemId } = useParams();
     const navigate = useNavigate();
     const [item, setItem] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -19,7 +19,7 @@ const ItemsDetailsPage = () => {
             try {
                 setLoading(true);
                 setError(null);
-                const data = await getDeviceDetails(itemSerialNumber); // Updated function call
+                const data = await getDeviceDetails(itemId); // Updated function call
                 setItem(data);
             } catch (err) {
                 setError(err.message || 'Failed to fetch device details.');
@@ -29,10 +29,10 @@ const ItemsDetailsPage = () => {
             }
         };
 
-        if (itemSerialNumber) {
+        if (itemId) {
             fetchItemDetails();
         }
-    }, [itemSerialNumber]);
+    }, [itemId]);
 
     if (loading) {
         return (

@@ -19,22 +19,22 @@ router = APIRouter(
 )
 
 
-@router.get("/devices/{device_serial_number}", response_model=device_schemas.DeviceRead)
+@router.get("/devices/{device_id}", response_model=device_schemas.DeviceRead)
 async def get_device(
-    device_serial_number: str,
+    device_id: str,
     db: Session = Depends(get_db)
 ):
     """
-    Get a specific device by its serial number.
+    Get a specific device by its ID.
     """
-    device = device_service.device_service.get_device_by_serial_number(db=db, device_serial_number=device_serial_number, options=[selectinload(Device.owner)])
+    device = device_service.device_service.get_device_by_id(db=db, device_id=device_id, options=[selectinload(Device.owner)])
     if not device:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Device not found")
     return device
 
-@router.put("/devices/{device_serial_number}", response_model=device_schemas.DeviceRead)
+@router.put("/devices/{device_id}", response_model=device_schemas.DeviceRead)
 async def update_device(
-    device_serial_number: str,
+    device_id: str,
     device_in: device_schemas.DeviceUpdate,
     db: Session = Depends(get_db), 
     current_user: User = Depends(get_current_active_user)
@@ -42,7 +42,7 @@ async def update_device(
     """
     Update a device.
     """
-    device = device_service.device_service.get_device_by_serial_number(db=db, device_serial_number=device_serial_number, options=[selectinload(Device.owner)])
+    device = device_service.device_service.get_device_by_id(db=db, device_id=device_id, options=[selectinload(Device.owner)])
     if not device:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Device not found")
     if device.user_id != current_user.id and not current_user.is_superuser:
@@ -51,16 +51,16 @@ async def update_device(
     db.refresh(updated_device, attribute_names=["owner"])
     return updated_device
 
-@router.delete("/devices/{device_serial_number}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/devices/{device_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_device(
-    device_serial_number: str,
+    device_id: str,
     db: Session = Depends(get_db), 
     current_user: User = Depends(get_current_active_user)
 ):
     """
     Delete a device.
     """
-    device = device_service.device_service.get_device_by_serial_number(db=db, device_serial_number=device_serial_number, options=[selectinload(Device.owner)])
+    device = device_service.device_service.get_device_by_id(db=db, device_id=device_id, options=[selectinload(Device.owner)])
     if not device:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Device not found")
     if device.user_id != current_user.id and not current_user.is_superuser:

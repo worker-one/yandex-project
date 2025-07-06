@@ -177,7 +177,7 @@ const DevicesTable = ({ refreshTrigger }) => { // Add refreshTrigger to props
                     <TableCell align="center">
                       <Button
                         component={RouterLink}
-                        to={`/devices/${device.device_info?.serial_number || device.custom_data.serial_number}`}
+                        to={`/devices/${device.id}`}
                         variant="outlined"
                         size="small"
                         onClick={(e) => e.stopPropagation()}

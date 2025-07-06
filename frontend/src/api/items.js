@@ -10,8 +10,8 @@ import { fetchApi } from './api.js'; // Import the fetchApi function
  * @param {string} deviceSerialNumber - The serial number of the device.
  * @returns {Promise<object>} - The device details object.
  */
-export async function getDeviceDetails(deviceSerialNumber) {
-    return fetchApi(`/devices/${deviceSerialNumber}`, { method: 'GET' }); // Assuming public endpoint
+export async function getDeviceDetails(deviceId) {
+    return fetchApi(`/devices/${deviceId}`, { method: 'GET' }); // Assuming public endpoint
 }
 
 
