@@ -83,7 +83,7 @@ export async function deleteDevice(deviceSerialNumber) {
 /**
  * Fetches user's devices with pagination.
  * @param {object} params - Pagination parameters.
- * @returns {Promise<object>} - User's devices response.
+ * @returns {Promise<object>} - User's devices response with DevicesListResponse schema.
  */
 export async function getUserDevices(params = { skip: 0, limit: 100 }) {
     const query = new URLSearchParams(params).toString();
@@ -92,8 +92,8 @@ export async function getUserDevices(params = { skip: 0, limit: 100 }) {
 
 /**
  * Queries user's devices with filters.
- * @param {object} queryData - Query filters.
- * @returns {Promise<object>} - Filtered devices response.
+ * @param {object} queryData - Query filters (name, user_id).
+ * @returns {Promise<object>} - Filtered devices response with DevicesListResponse schema.
  */
 export async function queryUserDevices(queryData) {
     return fetchApi('/user/devices/query', {
