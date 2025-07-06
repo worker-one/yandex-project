@@ -42,8 +42,21 @@ const DevicesTable = ({ refreshTrigger }) => { // Add refreshTrigger to props
       console.log('[DevicesTable] Fetching user devices with params:', params);
       const data = await fetchUserDevicesAPI(params); // Use imported API function
       console.log('[DevicesTable] Received devices data:', data);
-      setDevices(data.devices || []);
-      setTotalRows(data.total || 0);
+      
+      // Handle UserDevicesResponse structure: data.payload.devices
+      const devicesArray = data.payload?.devices || [];
+      const mappedDevices = devicesArray.map(device => ({
+        id: device.id,
+        serial_number: device.id, // Using id as serial_number for DevicePayloadDevice
+        name: device.name,
+        owner: null, // DevicePayloadDevice doesn't include owner info
+        description: device.description,
+        type: device.type,
+        room: device.room
+      }));
+      
+      setDevices(mappedDevices);
+      setTotalRows(devicesArray.length); // No total count in UserDevicesResponse
     } catch (err) {
       console.error('[DevicesTable] Error fetching devices:', err);
       setError(err.message);
