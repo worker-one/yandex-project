@@ -142,7 +142,11 @@ async def get_user_devices(
             room=device.room,
             type=device.type,
             custom_data={},
-            capabilities=[],  # changed from {} to []
+            capabilities=[
+                {
+                    "type": "devices.capabilities.on_off"
+                }
+            ],
             properties=[],    # changed from {} to []
             device_info=device_schemas.DeviceInfo(
                 manufacturer="Elkarobotics",
