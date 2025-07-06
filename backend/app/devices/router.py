@@ -141,13 +141,12 @@ async def get_user_devices(
             description=f"Device {device.name}",
             room=device.room,
             type=device.type,
-            custom_data={},
+            custom_data={"serial_number": device.serial_number},
             capabilities={},
             properties={},
             device_info=device_schemas.DeviceInfo(
                 manufacturer="Elkarobotics",
                 model="Unknown",
-                serial_number=device.serial_number,  # <-- Add this line
                 hw_version="1.0",
                 sw_version="1.0"
             )
