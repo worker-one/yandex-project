@@ -17,6 +17,8 @@ class Device(Base, TimeStampMixin):
     serial_number = Column(String(100), unique=True, nullable=False)
     name = Column(String(100), nullable=False)
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    type = Column(String(50), nullable=False, default='openable')
+    room = Column(String(100), nullable=True, default=None)
 
     # relationship fields
     owner = relationship(
