@@ -69,7 +69,7 @@ const CreateForm = () => {
                 id="serial_number"
                 label="Serial Number"
                 name="serial_number"
-                value={deviceData.serial_number}
+                value={deviceData.custom_data.serial_number}
                 onChange={handleChange}
                 helperText="Enter the serial number of the device"
             />

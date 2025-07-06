@@ -3,14 +3,12 @@ from typing import Any, Dict, List, Optional
 from app.auth.schemas import UserRead
 
 class DeviceBase(BaseModel):
-    serial_number: str
     name: str
 
 class DeviceCreate(DeviceBase):
     pass
 
 class DeviceUpdate(BaseModel):
-    serial_number: Optional[str] = None
     name: Optional[str] = None
 
 class DeviceRead(DeviceBase):
@@ -18,7 +16,7 @@ class DeviceRead(DeviceBase):
     user_id: int
     owner: Optional[UserRead] = None
     room : Optional[str] = None
-    type: Optional[str] = "openable"
+    type: Optional[str] = "devices.type.openable"
 
     class Config:
         orm_mode = True
@@ -68,7 +66,6 @@ class DeviceStatusInfo(BaseModel):
 class DeviceInfo(BaseModel):
     manufacturer: str
     model: str
-    serial_number: str  # Always include serial_number here
     hw_version: str
     sw_version: str
 
