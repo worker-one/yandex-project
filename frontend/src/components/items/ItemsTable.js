@@ -151,7 +151,7 @@ const DevicesTable = ({ refreshTrigger }) => { // Add refreshTrigger to props
                   <TableRow
                     hover
                     key={device.id}
-                    onClick={(event) => handleRowClick(event, device.device_info?.serial_number || device.serial_number)}
+                    onClick={(event) => handleRowClick(event, device.id)}
                     sx={{ cursor: 'pointer' }}
                   >
                     {/* Index */}
