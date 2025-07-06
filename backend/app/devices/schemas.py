@@ -77,8 +77,8 @@ class DevicePayloadDevice(BaseModel):
     room: str
     type: str = "openable"
     custom_data: Dict[str, Any]
-    capabilities: Dict[str, Any]
-    properties: Dict[str, Any]
+    capabilities: List[Any]  # changed from Dict[str, Any] to List[Any]
+    properties: List[Any]    # changed from Dict[str, Any] to List[Any]
     device_info: DeviceInfo
 
 class UserDevicesPayload(BaseModel):
