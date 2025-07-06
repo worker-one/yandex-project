@@ -40,10 +40,13 @@ const DevicesTable = ({ refreshTrigger }) => { // Add refreshTrigger to props
       };
       // Remove undefined or null params
       Object.keys(params).forEach(key => (params[key] == null) && delete params[key]);
+      console.log('[DevicesTable] Fetching user devices with params:', params);
       const data = await fetchUserDevicesAPI(params); // Use imported API function
+      console.log('[DevicesTable] Received devices data:', data);
       setDevices(data.devices || []);
       setTotalRows(data.total || 0);
     } catch (err) {
+      console.error('[DevicesTable] Error fetching devices:', err);
       setError(err.message);
       setDevices([]);
       setTotalRows(0);
