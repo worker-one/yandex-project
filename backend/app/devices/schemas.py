@@ -17,6 +17,8 @@ class DeviceRead(DeviceBase):
     id: int
     user_id: int
     owner: Optional[UserRead] = None
+    room : Optional[str] = None
+    type: Optional[str] = "openable"
 
     class Config:
         orm_mode = True
