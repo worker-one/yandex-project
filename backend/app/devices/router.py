@@ -141,7 +141,7 @@ async def get_user_devices(
             description=f"Device {device.name}",
             room=device.room,
             type=device.type,
-            custom_data={"serial_number": device.serial_number},
+            custom_data={},
             capabilities={},
             properties={},
             device_info=device_schemas.DeviceInfo(
