@@ -12,7 +12,6 @@ const headCells = [
   { id: 'index', numeric: true, disablePadding: false, label: '#', sortable: false, align: 'center' },
   { id: 'name', numeric: false, disablePadding: false, label: 'Name', sortable: true, align: 'left' },
   { id: 'serial_number', numeric: false, disablePadding: false, label: 'Serial Number', sortable: true, align: 'left' },
-  { id: 'owner', numeric: false, disablePadding: false, label: 'Owner', sortable: false, align: 'left' },
   { id: 'actions', numeric: false, disablePadding: false, label: 'Actions', sortable: false, align: 'center' },
 ];
 
@@ -47,9 +46,8 @@ const DevicesTable = ({ refreshTrigger }) => { // Add refreshTrigger to props
       const devicesArray = data.payload?.devices || [];
       const mappedDevices = devicesArray.map(device => ({
         id: device.id,
-        serial_number: device.id, // Using id as serial_number for DevicePayloadDevice
+        serial_number: device.device_info.serial_number, // Using id as serial_number for DevicePayloadDevice
         name: device.name,
-        owner: null, // DevicePayloadDevice doesn't include owner info
         description: device.description,
         type: device.type,
         room: device.room
@@ -120,7 +118,6 @@ const DevicesTable = ({ refreshTrigger }) => { // Add refreshTrigger to props
                     ...(headCell.id === 'index' && { width: '5%' }),
                     ...(headCell.id === 'name' && { width: '20%' }),
                     ...(headCell.id === 'serial_number' && { width: '20%' }),
-                    ...(headCell.id === 'owner' && { width: '20%' }),
                     ...(headCell.id === 'actions' && { width: '15%' })
                   }}
                 >
@@ -153,7 +150,7 @@ const DevicesTable = ({ refreshTrigger }) => { // Add refreshTrigger to props
                   <TableRow
                     hover
                     key={device.id}
-                    onClick={(event) => handleRowClick(event, device.serial_number)}
+                    onClick={(event) => handleRowClick(event, device.device_info.serial_number)}
                     sx={{ cursor: 'pointer' }}
                   >
                     {/* Index */}
@@ -171,14 +168,7 @@ const DevicesTable = ({ refreshTrigger }) => { // Add refreshTrigger to props
                     {/* Serial Number */}
                     <TableCell align="left">
                       <Typography variant="body2">
-                        {device.serial_number || 'N/A'}
-                      </Typography>
-                    </TableCell>
-
-                    {/* Owner */}
-                    <TableCell align="left">
-                      <Typography variant="body2">
-                        {device.owner ? device.owner.email || device.owner.username || 'N/A' : 'N/A'}
+                        {device.device_info.serial_number || 'N/A'}
                       </Typography>
                     </TableCell>
 
@@ -186,7 +176,7 @@ const DevicesTable = ({ refreshTrigger }) => { // Add refreshTrigger to props
                     <TableCell align="center">
                       <Button
                         component={RouterLink}
-                        to={`/devices/${device.serial_number}`}
+                        to={`/devices/${device.device_info.serial_number}`}
                         variant="outlined"
                         size="small"
                         onClick={(e) => e.stopPropagation()}

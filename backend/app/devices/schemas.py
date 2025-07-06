@@ -66,6 +66,7 @@ class DeviceStatusInfo(BaseModel):
 class DeviceInfo(BaseModel):
     manufacturer: str
     model: str
+    serial_number: str  # Always include serial_number here
     hw_version: str
     sw_version: str
 
@@ -75,7 +76,7 @@ class DevicePayloadDevice(BaseModel):
     status_info: DeviceStatusInfo
     description: str
     room: str
-    type: str
+    type: str = "openable"
     custom_data: Dict[str, Any]
     capabilities: Dict[str, Any]
     properties: Dict[str, Any]
