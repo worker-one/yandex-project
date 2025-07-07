@@ -255,7 +255,15 @@ async def oauth_token_endpoint(
     OAuth 2.0 Token Endpoint (RFC 6749 section 3.2).
     Exchanges authorization code for access token.
     """
+    print(f"Token endpoint called with:")
+    print(f"  grant_type: {grant_type}")
+    print(f"  code: {code}")
+    print(f"  client_secret: {client_secret[:10]}..." if client_secret else "None")
+    print(f"  redirect_uri: {redirect_uri}")
+    print(f"  client_id: {client_id}")
+    
     if grant_type != "authorization_code":
+        print(f"ERROR: Unsupported grant_type: {grant_type}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Unsupported grant_type"
@@ -265,24 +273,32 @@ async def oauth_token_endpoint(
     # For now, we trust the code as it's single-use and short-lived.
     
     # Validate code
+    print(f"Checking code in store. Current codes: {list(oauth_code_store.keys())}")
     with oauth_code_store_lock:
         code_data = oauth_code_store.pop(code, None)
+    
     if not code_data:
+        print(f"ERROR: Code '{code}' not found in store or already used")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid or expired authorization code"
         )
+    
+    print(f"Code validated, associated with user_id: {code_data['user_id']}")
     user_id = code_data["user_id"]
     user = auth_service.get_user_by_id(db=db, user_id=user_id)
     if not user:
+        print(f"ERROR: User with id {user_id} not found in database")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="User not found"
         )
 
+    print(f"User found: {user.email}, generating tokens...")
     access_token = security.create_access_token(subject=user.id)
     refresh_token = security.create_refresh_token(subject=user.id)
 
+    print("Tokens generated successfully, returning response")
     return {
         "access_token": access_token,
         "token_type": "bearer",
