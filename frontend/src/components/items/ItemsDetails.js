@@ -21,10 +21,7 @@ const ItemDetails = ({ item }) => {
                     <Paper variant="outlined" sx={{ p: 2, height: '100%' }}>
                         <Typography variant="h6" gutterBottom>Details</Typography>
                         <Typography variant="body2" sx={{ mb: 1 }}>
-                            Device ID: {item.serial_number}
-                        </Typography>
-                        <Typography variant="body2" sx={{ mb: 1 }}>
-                            Position: {item.position}
+                            Serial Number: {item.serial_number}
                         </Typography>
                         <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                             <Typography variant="body2" sx={{ mr: 1 }}>Online Status:</Typography>
@@ -59,8 +56,6 @@ const ItemDetails = ({ item }) => {
                     </Paper>
                 </Grid>
 
-                {/* Placeholder for any other sections if needed in the future */}
-                {/* For example, if you re-introduce a simplified tags or related items section */}
             </Grid>
         </Paper>
     );

@@ -14,9 +14,9 @@ import { createDevice } from '../../api/devices.js';
 const CreateForm = () => {
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
-        name: '',
+        name: 'Шторы',
         serial_number: '',
-        room: 'main'
+        room: 'Спальня' // Default room
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
