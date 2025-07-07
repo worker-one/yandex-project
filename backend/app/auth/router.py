@@ -3,6 +3,8 @@ from fastapi import APIRouter, Depends, HTTPException, status, Body, Query, Form
 from sqlalchemy.orm import Session # Changed from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Annotated, List # Add List
 from fastapi.responses import RedirectResponse
+import uuid
+from threading import Lock
 
 from ..database.core import get_db
 
@@ -19,6 +21,10 @@ router = APIRouter(
     prefix="/auth",
     tags=["Authentication & Profile"]
 )
+
+# --- In-memory code store for demo OAuth flow ---
+oauth_code_store = {}
+oauth_code_store_lock = Lock()
 
 @router.post("/register", response_model=schemas.UserRead, status_code=status.HTTP_201_CREATED)
 async def register_user( # Changed async async def to async def
@@ -189,7 +195,6 @@ def sync_yandex_iot_devices_endpoint(
         )
     
     try:
-        # Pass the global_device_service instance to the auth_service method
         synced_devices = auth_service.sync_user_yandex_iot_devices(
             db=db, 
             user=current_user, 
@@ -199,11 +204,6 @@ def sync_yandex_iot_devices_endpoint(
     except HTTPException as e:
         raise e
     except Exception as e:
-        print(f"Unexpected error during Yandex IoT device sync: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An unexpected error occurred during Yandex IoT device synchronization."
-        )
         print(f"Unexpected error during Yandex IoT device sync: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -222,7 +222,6 @@ def oauth_authorize_endpoint(
     OAuth 2.0 Authorization Endpoint (RFC 6749 section 3.1).
     This is where the user would authenticate and authorize the client.
     """
-    # Validate response_type
     if response_type != "code":
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -230,12 +229,14 @@ def oauth_authorize_endpoint(
         )
     # TODO: Validate client_id, redirect_uri, and implement user consent/authentication
 
-    # Simulate successful authorization and generate a dummy code
-    dummy_code = "dummy_auth_code"
-    # Build redirect URL
-    from urllib.parse import urlencode
+    # Simulate successful authorization and generate a unique code
+    code = str(uuid.uuid4())
+    # For demo: associate code with user_id=1
+    with oauth_code_store_lock:
+        oauth_code_store[code] = {"user_id": 1}
 
-    params = {"code": dummy_code}
+    from urllib.parse import urlencode
+    params = {"code": code}
     if state:
         params["state"] = state
     redirect_url = f"{redirect_uri}?{urlencode(params)}"
@@ -253,22 +254,21 @@ async def oauth_token_endpoint(
     OAuth 2.0 Token Endpoint (RFC 6749 section 3.2).
     Exchanges authorization code for access token.
     """
-    # Only support authorization_code grant type for now
     if grant_type != "authorization_code":
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Unsupported grant_type"
         )
-    # Dummy code validation (replace with real lookup/validation)
-    if code != "dummy_auth_code":
+    # Validate code
+    with oauth_code_store_lock:
+        code_data = oauth_code_store.pop(code, None)
+    if not code_data:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid or expired authorization code"
         )
-    # TODO: Validate client_id, redirect_uri, and associate code with user
-
-    # Simulate user lookup (replace with real user retrieval)
-    user = auth_service.get_user_by_id(db=db, user_id=1)
+    user_id = code_data["user_id"]
+    user = auth_service.get_user_by_id(db=db, user_id=user_id)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

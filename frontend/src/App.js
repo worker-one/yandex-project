@@ -46,7 +46,7 @@ function App() {
                     <Route path="/register" element={<RegisterPage />} />
                     <Route path="/profile" element={<ProfilePage />} />
                     <Route path="/devices/create" element={<CreateItemPage />} />
-                    <Route path="/devices/:itemSerialNumber" element={<ItemsDetailsPage />} />
+                    <Route path="/devices/:itemId" element={<ItemsDetailsPage />} />
                     <Route path="/auth/yandex/callback" element={<YandexOAuthCallbackPage />} />
                     {/* Catch-all route for handling 404s */}
                     <Route path="*" element={<div>Page not found</div>} />
