@@ -1,87 +1,111 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router';
-import { Button, Box, CircularProgress, TextField, Typography, Alert } from '@mui/material';
-import { createDevice } from '../../api/devices';
+import {
+    Box,
+    TextField,
+    Button,
+    Typography,
+    Paper,
+    Alert,
+    CircularProgress
+} from '@mui/material';
+import { createDevice } from '../../api/devices.js';
 
 const CreateForm = () => {
-    const [deviceData, setDeviceData] = useState({
+    const navigate = useNavigate();
+    const [formData, setFormData] = useState({
         name: '',
         serial_number: '',
+        room: 'main'
     });
-    const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
-    const navigate = useNavigate();
+    const [error, setError] = useState('');
 
-    const handleChange = (event) => {
-        const { name, value } = event.target;
-        setDeviceData(prevState => ({
-            ...prevState,
-            [name]: value,
-        }));
+    const handleChange = (e) => {
+        setFormData({
+            ...formData,
+            [e.target.name]: e.target.value
+        });
     };
 
-    const handleSubmit = async (event) => {
-        event.preventDefault();
+    const handleSubmit = async (e) => {
+        e.preventDefault();
         setLoading(true);
-        setError(null);
-
-        // Filter out empty optional fields
-        const dataToSubmit = { ...deviceData };
-        for (const key in dataToSubmit) {
-            if (dataToSubmit[key] === '') {
-                delete dataToSubmit[key];
-            }
-        }
+        setError('');
 
         try {
-            const newDevice = await createDevice(dataToSubmit);
-            navigate(`/devices/${newDevice.serial_number}`);
+            await createDevice(formData);
+            navigate('/devices');
         } catch (err) {
-            setError(err.message || 'An error occurred while creating the device.');
-            console.error(err);
+            setError(err.message || 'Failed to create device');
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+        <Paper elevation={3} sx={{ p: 4 }}>
             <Typography variant="h4" component="h1" gutterBottom>
-                Add New Device
+                Create New Device
             </Typography>
-            {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-            <TextField
-                margin="normal"
-                required
-                fullWidth
-                id="name"
-                label="Device Name"
-                name="name"
-                autoComplete="name"
-                autoFocus
-                value={deviceData.name}
-                onChange={handleChange}
-            />
-            <TextField
-                margin="normal"
-                required
-                fullWidth
-                id="serial_number"
-                label="Serial Number"
-                name="serial_number"
-                value={deviceData.serial_number} // Fixed binding
-                onChange={handleChange}
-                helperText="Enter the serial number of the device"
-            />
-            <Button
-                type="submit"
-                variant="contained"
-                sx={{ mt: 3, mb: 2 }}
-                disabled={loading}
-            >
-                {loading ? <CircularProgress size={24} /> : 'Add Device'}
-            </Button>
-        </Box>
+            
+            {error && (
+                <Alert severity="error" sx={{ mb: 2 }}>
+                    {error}
+                </Alert>
+            )}
+
+            <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
+                <TextField
+                    fullWidth
+                    label="Device Name"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
+                    margin="normal"
+                />
+                
+                <TextField
+                    fullWidth
+                    label="Serial Number"
+                    name="serial_number"
+                    value={formData.serial_number}
+                    onChange={handleChange}
+                    required
+                    margin="normal"
+                />
+                
+                <TextField
+                    fullWidth
+                    label="Room"
+                    name="room"
+                    value={formData.room}
+                    onChange={handleChange}
+                    margin="normal"
+                    helperText="Specify which room this device belongs to"
+                />
+
+                <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
+                    <Button
+                        type="submit"
+                        variant="contained"
+                        disabled={loading}
+                        startIcon={loading && <CircularProgress size={20} />}
+                    >
+                        {loading ? 'Creating...' : 'Create Device'}
+                    </Button>
+                    
+                    <Button
+                        variant="outlined"
+                        onClick={() => navigate('/devices')}
+                        disabled={loading}
+                    >
+                        Cancel
+                    </Button>
+                </Box>
+            </Box>
+        </Paper>
     );
 };
 
