@@ -12,6 +12,7 @@ const headCells = [
   { id: 'index', numeric: true, disablePadding: false, label: '#', sortable: false, align: 'center' },
   { id: 'name', numeric: false, disablePadding: false, label: 'Name', sortable: true, align: 'left' },
   { id: 'serial_number', numeric: false, disablePadding: false, label: 'Serial Number', sortable: true, align: 'left' },
+  { id: 'room', numeric: false, disablePadding: false, label: 'Room', sortable: true, align: 'left' },
   { id: 'actions', numeric: false, disablePadding: false, label: 'Actions', sortable: false, align: 'center' },
 ];
 
@@ -170,6 +171,13 @@ const DevicesTable = ({ refreshTrigger }) => { // Add refreshTrigger to props
                     <TableCell align="left">
                       <Typography variant="body2">
                         {device.device_info?.serial_number || device.custom_data?.serial_number || 'N/A'}
+                      </Typography>
+                    </TableCell>
+
+                    {/* Room */}
+                    <TableCell align="left">
+                      <Typography variant="body2">
+                        {device.room || 'N/A'}
                       </Typography>
                     </TableCell>
 

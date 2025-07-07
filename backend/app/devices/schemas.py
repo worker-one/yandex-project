@@ -19,8 +19,9 @@ class DeviceRead(DeviceBase):
     id: int
     user_id: int
     owner: Optional[UserRead] = None
-    room : Optional[str] = "main"
-    type: Optional[str] = "devices.type.openable"
+    room : Optional[str] = "Спальня"
+    type: Optional[str] = "devices.types.openable.curtain"
+    custom_data: Dict[str, Any] = {}
 
     class Config:
         orm_mode = True

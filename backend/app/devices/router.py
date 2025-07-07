@@ -27,7 +27,12 @@ async def get_device(
     """
     Get a specific device by its ID.
     """
-    device = device_service.device_service.get_device_by_id(db=db, device_id=device_id, options=[selectinload(Device.owner)])
+    try:
+        device_id_int = int(device_id)
+    except ValueError:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid device ID format")
+    
+    device = device_service.device_service.get_device_by_id(db=db, device_id=device_id_int, options=[selectinload(Device.owner)])
     if not device:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Device not found")
     return device
@@ -42,7 +47,12 @@ async def update_device(
     """
     Update a device.
     """
-    device = device_service.device_service.get_device_by_id(db=db, device_id=device_id, options=[selectinload(Device.owner)])
+    try:
+        device_id_int = int(device_id)
+    except ValueError:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid device ID format")
+    
+    device = device_service.device_service.get_device_by_id(db=db, device_id=device_id_int, options=[selectinload(Device.owner)])
     if not device:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Device not found")
     if device.user_id != current_user.id and not current_user.is_superuser:
@@ -60,7 +70,12 @@ async def delete_device(
     """
     Delete a device.
     """
-    device = device_service.device_service.get_device_by_id(db=db, device_id=device_id, options=[selectinload(Device.owner)])
+    try:
+        device_id_int = int(device_id)
+    except ValueError:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid device ID format")
+    
+    device = device_service.device_service.get_device_by_id(db=db, device_id=device_id_int, options=[selectinload(Device.owner)])
     if not device:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Device not found")
     if device.user_id != current_user.id and not current_user.is_superuser:

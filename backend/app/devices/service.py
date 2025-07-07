@@ -81,7 +81,11 @@ class DeviceService:
         devices = result.scalars().all()
 
         # Convert SQLAlchemy models to Pydantic models
-        devices_read = [device_schemas.DeviceRead.model_validate(device, from_attributes=True) for device in devices]
+        devices_read = []
+        for device in devices:
+            device_read = device_schemas.DeviceRead.model_validate(device, from_attributes=True)
+            device_read.custom_data["serial_number"] = device.serial_number
+            devices_read.append(device_read)
 
         return device_schemas.DeviceListResponse(
             devices=devices_read,
