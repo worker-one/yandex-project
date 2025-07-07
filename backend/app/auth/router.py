@@ -246,8 +246,9 @@ def oauth_authorize_endpoint(
 async def oauth_token_endpoint(
     grant_type: str = Form(..., description="OAuth grant type, e.g., 'authorization_code'"),
     code: str = Form(..., description="The authorization code received from the /authorize endpoint"),
-    redirect_uri: str = Form(..., description="The redirect URI used in the authorization request"),
-    client_id: str = Form(..., description="The client ID"),
+    client_secret: str = Form(..., description="The client secret (OAuth token of the skill)"),
+    redirect_uri: str = Form(None, description="The redirect URI used in the authorization request"),
+    client_id: str = Form(None, description="The client ID"),
     db: Session = Depends(get_db),
 ):
     """
@@ -259,6 +260,10 @@ async def oauth_token_endpoint(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Unsupported grant_type"
         )
+    
+    # TODO: Validate client_id and client_secret if necessary
+    # For now, we trust the code as it's single-use and short-lived.
+    
     # Validate code
     with oauth_code_store_lock:
         code_data = oauth_code_store.pop(code, None)
