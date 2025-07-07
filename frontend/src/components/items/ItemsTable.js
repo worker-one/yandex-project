@@ -170,7 +170,7 @@ const DevicesTable = ({ refreshTrigger }) => { // Add refreshTrigger to props
                     {/* Serial Number */}
                     <TableCell align="left">
                       <Typography variant="body2">
-                        {device.device_info?.serial_number || device.custom_data?.serial_number || 'N/A'}
+                        {device.custom_data?.serial_number || 'N/A'}
                       </Typography>
                     </TableCell>
 
