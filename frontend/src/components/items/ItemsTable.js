@@ -11,7 +11,6 @@ const DEFAULT_ROWS_PER_PAGE = 20;
 const headCells = [
   { id: 'index', numeric: true, disablePadding: false, label: '#', sortable: false, align: 'center' },
   { id: 'name', numeric: false, disablePadding: false, label: 'Name', sortable: true, align: 'left' },
-  { id: 'serial_number', numeric: false, disablePadding: false, label: 'Serial Number', sortable: true, align: 'left' },
   { id: 'room', numeric: false, disablePadding: false, label: 'Room', sortable: true, align: 'left' },
   { id: 'actions', numeric: false, disablePadding: false, label: 'Actions', sortable: false, align: 'center' },
 ];
@@ -167,12 +166,6 @@ const DevicesTable = ({ refreshTrigger }) => { // Add refreshTrigger to props
                       </Typography>
                     </TableCell>
 
-                    {/* Serial Number */}
-                    <TableCell align="left">
-                      <Typography variant="body2">
-                        {device.custom_data?.serial_number || 'N/A'}
-                      </Typography>
-                    </TableCell>
 
                     {/* Room */}
                     <TableCell align="left">
