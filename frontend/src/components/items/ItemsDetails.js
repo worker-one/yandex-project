@@ -25,8 +25,8 @@ const ItemDetails = ({ item }) => {
                         </Typography>
                         <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                             <Typography variant="body2" sx={{ mr: 1 }}>Status:</Typography>
-                            {item.capabilities.instance.on ? <CheckCircleIcon color="success" /> : <CancelIcon color="error" />}
-                            {item.capabilities.instance.on ? <Typography variant="body2" sx={{ ml: 0.5 }}>Open</Typography> : <Typography variant="body2" sx={{ ml: 0.5 }}>Closed</Typography>}
+                            {item.status === "on" ? <CheckCircleIcon color="success" /> : <CancelIcon color="error" />}
+                            {item.status === "on" ? <Typography variant="body2" sx={{ ml: 0.5 }}>Open</Typography> : <Typography variant="body2" sx={{ ml: 0.5 }}>Closed</Typography>}
                         </Box>
                         {item.last_seen && (
                             <Typography variant="body2" sx={{ mb: 1 }}>
