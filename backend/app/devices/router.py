@@ -204,11 +204,12 @@ async def change_device_status(
     """
     Change device status.
     """
-    # Get user's devices
+    # Get user's devices as ORM instances
     devices_result = device_service.device_service.get_user_devices(
         db=db,
         user_id=current_user.id,
-        options=[selectinload(Device.owner)]
+        options=[selectinload(Device.owner)],
+        return_orm=True
     )
 
     def device_to_action_payload(device):

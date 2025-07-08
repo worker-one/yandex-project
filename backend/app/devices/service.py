@@ -122,7 +122,8 @@ class DeviceService:
         user_id: int,
         skip: int = 0,
         limit: int = 100,
-        options: List = None
+        options: List = None,
+        return_orm: bool = False
     ):
         """Get devices for a specific user."""
         query = select(device_models.Device).where(device_models.Device.user_id == user_id)
@@ -134,6 +135,13 @@ class DeviceService:
         query = query.offset(skip).limit(limit)
         result = db.execute(query)
         devices = result.scalars().all()
+        
+        if return_orm:
+            # Return raw ORM instances for updates
+            return type('DevicesResult', (), {
+                'devices': devices,
+                'total': total
+            })()
         
         devices_read = [device_schemas.DeviceRead.model_validate(device, from_attributes=True) for device in devices]
         
