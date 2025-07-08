@@ -1,7 +1,9 @@
 # app/devices/router.py
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, status, Query, Body
 from sqlalchemy.orm import Session, selectinload
 import uuid
+from pydantic import BaseModel
+from typing import List
 
 from app.database.core import get_db
 from app.devices import schemas as device_schemas
@@ -196,52 +198,62 @@ async def query_user_devices(
 
 # Change device status
 # POST https://example.com/v1.0/user/devices/action
+class DeviceActionRequestCapability(device_schemas.DeviceActionCapability):
+    state: dict
+
+class DeviceActionRequestDevice(BaseModel):
+    id: str
+    capabilities: List[DeviceActionRequestCapability]
+
+class UserDevicesActionRequestPayload(BaseModel):
+    devices: List[DeviceActionRequestDevice]
+
+class UserDevicesActionRequest(BaseModel):
+    payload: UserDevicesActionRequestPayload
+
 @router.post("/user/devices/action", response_model=device_schemas.UserDevicesActionResponse)
 async def change_device_status(
+    request: UserDevicesActionRequest = Body(...),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ):
     """
-    Change device status.
+    Change device status (Yandex Smart Home compliant).
     """
-    # Get user's devices as ORM instances
-    devices_result = device_service.device_service.get_user_devices(
-        db=db,
-        user_id=current_user.id,
-        options=[selectinload(Device.owner)],
-        return_orm=True
-    )
-
-    def device_to_action_payload(device):
-        # Toggle status
-        new_status = "on" if device.status == "off" else "off"
-        # Update in DB
-        updated_device = device_service.device_service.update_device(
-            db=db,
-            device=device,
-            device_in=device_schemas.DeviceUpdate(status=new_status)
-        )
-        # Ensure updated_device is an ORM instance, not a Pydantic schema
-        db.refresh(updated_device, attribute_names=["owner"])
-        return device_schemas.DeviceActionDevice(
-            id=str(updated_device.id),
-            custom_data={},
-            capabilities=[
-                device_schemas.DeviceActionCapability(
-                    type="devices.capabilities.on_off",
-                    state={"instance": new_status, "action_result": {"status": "DONE"}}
+    response_devices = []
+    for req_device in request.payload.devices:
+        device = device_service.device_service.get_device_by_id(db=db, device_id=int(req_device.id))
+        if not device or device.user_id != current_user.id:
+            continue  # skip devices not found or not owned
+        device_capabilities = []
+        for cap in req_device.capabilities:
+            # Only handle on_off for now
+            if cap.type == "devices.capabilities.on_off":
+                instance = cap.state.get("instance")
+                value = cap.state.get("value")
+                # Map value to status
+                new_status = "on" if value else "off"
+                device_service.device_service.update_device(
+                    db=db,
+                    device=device,
+                    device_in=device_schemas.DeviceUpdate(status=new_status)
                 )
-            ]
-        )
-
-    payload_devices = [device_to_action_payload(d) for d in devices_result.devices]
-    response = device_schemas.UserDevicesActionResponse(
-        payload=device_schemas.UserDevicesActionPayload(
-            devices=payload_devices
-        )
+                db.refresh(device)
+                device_capabilities.append(device_schemas.DeviceActionCapability(
+                    type=cap.type,
+                    state={
+                        "instance": instance,
+                        "action_result": {"status": "DONE"}
+                    }
+                ))
+        response_devices.append(device_schemas.DeviceActionDevice(
+            id=str(device.id),
+            custom_data={},
+            capabilities=device_capabilities
+        ))
+    return device_schemas.UserDevicesActionResponse(
+        payload=device_schemas.UserDevicesActionPayload(devices=response_devices)
     )
-    return response
-
  
 # Unlink account
 # POST https://example.com/v1.0/user/unlink
