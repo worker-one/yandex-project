@@ -33,7 +33,7 @@ export async function adminListUsers(params = { skip: 0, limit: 50 }) {
  * @param {number} [params.limit] - Number of devices per page.
  * @param {string} [params.name] - Filter by device name (substring match).
  * @param {number} [params.user_id] - Filter by owner's user ID.
- * @param {string} [params.field] - Field to sort by (e.g., 'name', 'serial_number', 'is_online', 'last_seen', 'user_id', 'created_at', 'updated_at').
+ * @param {string} [params.field] - Field to sort by (e.g., 'name', 'serial_number', 'status', 'last_seen', 'user_id', 'created_at', 'updated_at').
  * @param {string} [params.direction] - Sort direction ('asc' or 'desc').
  * @returns {Promise<object>} - An object containing the list of devices and the total count, e.g., { devices: [], total: number }.
  */

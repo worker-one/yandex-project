@@ -198,14 +198,13 @@ async def query_user_devices(
 # POST https://example.com/v1.0/user/devices/action
 @router.post("/user/devices/action", response_model=device_schemas.UserDevicesActionResponse)
 async def change_device_status(
-    #action: device_schemas.DeviceAction,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ):
     """
     Change device status.
     """
-    # Mock implementation for demonstration
+    # Get user's devices
     devices_result = device_service.device_service.get_user_devices(
         db=db,
         user_id=current_user.id,
@@ -213,13 +212,22 @@ async def change_device_status(
     )
 
     def device_to_action_payload(device):
+        # Toggle status
+        new_status = "on" if device.status == "off" else "off"
+        # Update in DB
+        updated_device = device_service.device_service.update_device(
+            db=db,
+            device=device,
+            device_in=device_schemas.DeviceUpdate(status=new_status)
+        )
+        db.refresh(updated_device, attribute_names=["owner"])
         return device_schemas.DeviceActionDevice(
-            id=str(device.id),
+            id=str(updated_device.id),
             custom_data={},
             capabilities=[
                 device_schemas.DeviceActionCapability(
                     type="devices.capabilities.on_off",
-                    state={"instance": "on", "action_result": {"status": "DONE"}}
+                    state={"instance": updated_device.status, "action_result": {"status": "DONE"}}
                 )
             ]
         )

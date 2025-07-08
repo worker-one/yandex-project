@@ -80,7 +80,7 @@ class DevicePayloadDevice(BaseModel):
     status_info: DeviceStatusInfo
     description: str
     room: str
-    type: str = "openable"
+    type: str = "devices.types.openable.curtain"
     custom_data: Dict[str, Any]
     capabilities: List[Any]  # changed from Dict[str, Any] to List[Any]
     properties: List[Any]    # changed from Dict[str, Any] to List[Any]

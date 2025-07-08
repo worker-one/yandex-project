@@ -15,6 +15,7 @@ class Device(Base, TimeStampMixin):
 
     id = Column(Integer, primary_key=True, index=True)
     serial_number = Column(String(100), unique=True, nullable=False)
+    status = Column(String(50), nullable=False, default='off')  # 'on' or 'off'
     name = Column(String(100), nullable=False)
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     type = Column(String(50), nullable=False, default='openable')
