@@ -19,6 +19,7 @@ class DeviceRead(DeviceBase):
     id: int
     user_id: int
     owner: Optional[UserRead] = None
+    status: Optional[str] = "off"  # 'on' or 'off'
     room : Optional[str] = "Спальня"
     type: Optional[str] = "devices.types.openable.curtain"
     custom_data: Dict[str, Any] = {}
