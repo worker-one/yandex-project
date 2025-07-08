@@ -220,6 +220,7 @@ async def change_device_status(
             device=device,
             device_in=device_schemas.DeviceUpdate(status=new_status)
         )
+        # Ensure updated_device is an ORM instance, not a Pydantic schema
         db.refresh(updated_device, attribute_names=["owner"])
         return device_schemas.DeviceActionDevice(
             id=str(updated_device.id),
@@ -227,7 +228,7 @@ async def change_device_status(
             capabilities=[
                 device_schemas.DeviceActionCapability(
                     type="devices.capabilities.on_off",
-                    state={"instance": updated_device.status, "action_result": {"status": "DONE"}}
+                    state={"instance": new_status, "action_result": {"status": "DONE"}}
                 )
             ]
         )

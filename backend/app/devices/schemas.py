@@ -13,6 +13,7 @@ class DeviceCreate(DeviceBase):
 class DeviceUpdate(BaseModel):
     name: Optional[str] = None
     serial_number: Optional[str] = None  # Added
+    status: Optional[str] = "off"
     room: Optional[str] = None
 
 class DeviceRead(DeviceBase):
