@@ -2,10 +2,13 @@
 from fastapi import FastAPI
 from fastapi import APIRouter
 from fastapi.middleware.cors import CORSMiddleware
+import asyncio
 
 from app.config import settings
 from app.auth.router import router as auth_router
 from app.devices.router import router as devices_router
+from app.mqtt.service import initialize_mqtt_service
+from app.devices.mqtt_service import device_mqtt_service
 
 if settings.ENVIRONMENT == "local":
     LOG_LEVEL = "debug"  # Set log level to debug for local development
@@ -44,6 +47,42 @@ api_router_v1.include_router(auth_router)
 api_router_v1.include_router(devices_router)
 
 app.include_router(api_router_v1, prefix=settings.API_V1_STR)
+
+
+# Startup and shutdown events
+@app.on_event("startup")
+async def startup_event():
+    """Initialize services on startup"""
+    if settings.MQTT_ENABLED:
+        try:
+            # Initialize MQTT service
+            await initialize_mqtt_service(
+                broker_host=settings.MQTT_BROKER_HOST,
+                broker_port=settings.MQTT_BROKER_PORT,
+                username=settings.MQTT_USERNAME,
+                password=settings.MQTT_PASSWORD
+            )
+            
+            # Register device status callback
+            await device_mqtt_service.register_device_status_callback()
+            
+            print("MQTT service initialized successfully")
+        except Exception as e:
+            print(f"Failed to initialize MQTT service: {e}")
+            print("Application will continue without MQTT support")
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Cleanup on shutdown"""
+    if settings.MQTT_ENABLED:
+        try:
+            from app.mqtt.service import get_mqtt_service
+            mqtt_service = await get_mqtt_service()
+            await mqtt_service.disconnect()
+            print("MQTT service disconnected")
+        except Exception as e:
+            print(f"Error disconnecting MQTT service: {e}")
 
 
 # Health check endpoint via HEAD

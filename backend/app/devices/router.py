@@ -8,6 +8,7 @@ from typing import List
 from app.database.core import get_db
 from app.devices import schemas as device_schemas
 from app.devices import service as device_service
+from app.devices.mqtt_service import device_mqtt_service
 from app import schemas as common_schemas
 # auth_service
 from app.auth.service import auth_service
@@ -218,20 +219,22 @@ async def change_device_status(
     current_user: User = Depends(get_current_active_user)
 ):
     """
-    Change device status (Yandex Smart Home compliant).
+    Change device status (Yandex Smart Home compliant) with MQTT support.
     """
     response_devices = []
     for req_device in request.payload.devices:
         device = device_service.device_service.get_device_by_id(db=db, device_id=int(req_device.id))
         if not device or device.user_id != current_user.id:
             continue  # skip devices not found or not owned
+        
         device_capabilities = []
         for cap in req_device.capabilities:
-            # Only handle on_off for now
+            # Handle on_off capability (preserve existing logic)
             if cap.type == "devices.capabilities.on_off":
                 instance = cap.state.get("instance")
                 value = cap.state.get("value")
-                # Map value to status
+                
+                # ALWAYS update database first (preserve existing behavior)
                 new_status = "on" if value else "off"
                 device_service.device_service.update_device(
                     db=db,
@@ -239,18 +242,65 @@ async def change_device_status(
                     device_in=device_schemas.DeviceUpdate(status=new_status)
                 )
                 db.refresh(device)
+                
+                # Try to send MQTT command (non-blocking)
+                mqtt_result = {"status": "DONE"}  # Default success
+                try:
+                    mqtt_result = await device_mqtt_service.handle_yandex_command(
+                        db=db,
+                        device=device,
+                        capability_type=cap.type,
+                        state=cap.state
+                    )
+                    
+                    # If MQTT response differs from expected, log it but don't fail
+                    if mqtt_result.get("status") != "DONE":
+                        logger.warning(f"MQTT command failed for device {device.id}: {mqtt_result.get('error', 'Unknown error')}")
+                        # Keep the database update but note the MQTT failure
+                        mqtt_result = {"status": "DONE", "mqtt_warning": mqtt_result.get("error")}
+                        
+                except Exception as e:
+                    # MQTT failed but don't fail the request
+                    logger.error(f"MQTT command failed for device {device.id}: {e}")
+                    mqtt_result = {"status": "DONE", "mqtt_warning": f"MQTT unavailable: {str(e)}"}
+                
                 device_capabilities.append(device_schemas.DeviceActionCapability(
                     type=cap.type,
                     state={
                         "instance": instance,
-                        "action_result": {"status": "DONE"}
+                        "action_result": mqtt_result
                     }
                 ))
+            else:
+                # Handle other capabilities via MQTT only
+                try:
+                    mqtt_result = await device_mqtt_service.handle_yandex_command(
+                        db=db,
+                        device=device,
+                        capability_type=cap.type,
+                        state=cap.state
+                    )
+                except Exception as e:
+                    logger.error(f"MQTT command failed for device {device.id}, capability {cap.type}: {e}")
+                    mqtt_result = {
+                        "status": "ERROR",
+                        "error": f"MQTT command failed: {str(e)}"
+                    }
+                
+                device_capabilities.append(device_schemas.DeviceActionCapability(
+                    type=cap.type,
+                    state={
+                        "instance": cap.state.get("instance"),
+                        "action_result": mqtt_result
+                    }
+                ))
+        
         response_devices.append(device_schemas.DeviceActionDevice(
             id=str(device.id),
             custom_data={},
             capabilities=device_capabilities
         ))
+    
     return device_schemas.UserDevicesActionResponse(
         payload=device_schemas.UserDevicesActionPayload(devices=response_devices)
     )
