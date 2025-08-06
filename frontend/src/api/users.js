@@ -34,8 +34,13 @@ export async function registerUser(email, name, password) {
  * @returns {Promise<object>} - The token object { access_token, refresh_token, token_type } from the API.
  */
 export async function loginUser(email, password) {
+    // Create form data as expected by OAuth2PasswordRequestForm
+    const formData = new FormData();
+    formData.append('username', email); // OAuth2PasswordRequestForm expects 'username' field
+    formData.append('password', password);
+    
     return fetchApi('/auth/login', {
         method: 'POST',
-        body: JSON.stringify({ email, password }), // Sending JSON
+        body: formData, // Send as form data, not JSON
     });
 }

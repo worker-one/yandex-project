@@ -5,7 +5,9 @@ from datetime import datetime
 # --- User Schemas ---
 class UserBase(BaseModel):
     email: EmailStr
-    name: str = Field(..., min_length=3, max_length=50)
+    name: Optional[str] = Field(..., min_length=3, max_length=50)
+    is_superuser: bool = False
+    is_active: bool = True  # Optional: If user blocking is needed
     avatar_url: Optional[str] = None
 
 class UserCreate(UserBase):
@@ -35,7 +37,7 @@ class UserPasswordUpdate(BaseModel):
 
 # --- Login Schemas ---
 class LoginRequest(BaseModel):
-    email: EmailStr = None
+    email: Optional[EmailStr] = None
     username: Optional[str] = None
     password: str
     

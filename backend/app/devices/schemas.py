@@ -1,10 +1,10 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, ConfigDict
 from typing import Any, Dict, List, Optional
 from app.auth.schemas import UserRead
 
 class DeviceBase(BaseModel):
     name: str
-    serial_number: str  # Added
+    serial_number: str = Field(..., description="Serial number in format SNXXXXXXXXXXXXX (SN followed by 13 digits)", example="SN1234567890123")
     room: Optional[str] = "main"
 
 class DeviceCreate(DeviceBase):
@@ -12,8 +12,8 @@ class DeviceCreate(DeviceBase):
 
 class DeviceUpdate(BaseModel):
     name: Optional[str] = None
-    serial_number: Optional[str] = None  # Added
-    status: Optional[str] = "off"
+    serial_number: Optional[str] = Field(None, description="Serial number in format SNXXXXXXXXXXXXX (SN followed by 13 digits)", example="SN1234567890123")
+    status: Optional[str] = None
     room: Optional[str] = None
 
 class DeviceRead(DeviceBase):
@@ -21,12 +21,11 @@ class DeviceRead(DeviceBase):
     user_id: int
     owner: Optional[UserRead] = None
     status: Optional[str] = "off"  # 'on' or 'off'
-    room : Optional[str] = "Спальня"
+    room : Optional[str] = None
     type: Optional[str] = "devices.types.openable.curtain"
     custom_data: Dict[str, Any] = {}
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 class DeviceReadDetails(DeviceRead):
     pass
@@ -41,20 +40,20 @@ class DeviceSort(BaseModel):
     field: str
     direction: str  # 'asc' or 'desc'
 
-    class Config:
-        schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "field": "name",
                 "direction": "asc"
             }
         }
+    )
 
 class DeviceListResponse(BaseModel):
     devices: list[DeviceRead]
     total: int
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 class DeviceQuery(BaseModel):
     name: Optional[str] = None
@@ -64,8 +63,7 @@ class DevicesListResponse(BaseModel):
     devices: list[DeviceRead]
     total: int
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 class DeviceStatusInfo(BaseModel):
     reportable: bool
@@ -110,3 +108,33 @@ class UserDevicesActionPayload(BaseModel):
 
 class UserDevicesActionResponse(BaseModel):
     payload: UserDevicesActionPayload
+
+class SerialNumberBase(BaseModel):
+    value: str = Field(..., description="Serial number in format SNXXXXXXXXXXXXX (SN followed by 13 digits)", example="SN1234567890123")
+    device_id: Optional[int] = None
+    user_id: Optional[int] = None
+    is_free: bool = True
+
+class SerialNumberCreate(SerialNumberBase):
+    pass
+class SerialNumberError(BaseModel):
+    error: str
+    message: str
+
+class SerialNumberRead(SerialNumberBase):
+    id: int
+    is_free: bool
+    user_id: Optional[int] = None
+    device_id: Optional[int] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+class SerialNumberCreateResponse(BaseModel):
+    serial_number: SerialNumberRead
+    message: str
+
+class SerialNumberListResponse(BaseModel):
+    serial_numbers: List[SerialNumberRead]
+    total: int
+
+    model_config = ConfigDict(from_attributes=True)

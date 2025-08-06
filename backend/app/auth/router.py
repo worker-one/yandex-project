@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Body, Query, Form
 from sqlalchemy.orm import Session # Changed from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Annotated, List # Add List
 from fastapi.responses import RedirectResponse
+from fastapi.security import OAuth2PasswordRequestForm
 import uuid
 from threading import Lock
 
@@ -27,7 +28,7 @@ oauth_code_store = {}
 oauth_code_store_lock = Lock()
 
 @router.post("/register", response_model=schemas.UserRead, status_code=status.HTTP_201_CREATED)
-async def register_user( # Changed async async def to async def
+def register_user( # Changed async async def to async def
     user_in: schemas.UserCreate,
     db: Session = Depends(get_db) # Changed AsyncSession to Session
 ):
@@ -38,16 +39,16 @@ async def register_user( # Changed async async def to async def
     return db_user
 
 @router.post("/login", response_model=schemas.Token)
-async def login_for_access_token( # Changed async async def to async def
-    db: Session = Depends(get_db), # Changed AsyncSession to Session
-    form_data: schemas.LoginRequest = Body(...) # Use Body for JSON payload
+def login_for_access_token(
+    db: Session = Depends(get_db),
+    form_data: OAuth2PasswordRequestForm = Depends()
 ):
     """
     Authenticate user and return access and refresh tokens.
     """
-    email = form_data.email if form_data.email else form_data.username
-    user = auth_service.authenticate_user( # Removed await (already done in input)
-        db, email=form_data.email, password=form_data.password
+    email = form_data.username  # OAuth2PasswordRequestForm uses 'username' field
+    user = auth_service.authenticate_user(
+        db, email=email, password=form_data.password
     )
     if not user:
         raise HTTPException(
@@ -62,7 +63,7 @@ async def login_for_access_token( # Changed async async def to async def
     return schemas.Token(access_token=access_token, refresh_token=refresh_token)
 
 @router.post("/refresh", response_model=schemas.Token)
-async def refresh_access_token( # Changed async async def to async def
+def refresh_access_token( # Changed async async def to async def
     refresh_request: schemas.RefreshTokenRequest,
     db: Session = Depends(get_db) # Changed AsyncSession to Session
 ):
@@ -103,14 +104,14 @@ async def refresh_access_token( # Changed async async def to async def
 CurrentUser = Annotated[User, Depends(get_current_active_user)]
 
 @router.get("/profile", response_model=schemas.UserRead)
-async def read_users_me(current_user: CurrentUser): # Changed async async def to async def
+def read_users_me(current_user: CurrentUser): # Changed async async def to async def
     """
     Get current logged-in user's profile.
     """
     return current_user
 
 @router.patch("/profile", response_model=schemas.UserRead)
-async def update_users_me( # Changed async async def to async def
+def update_users_me( # Changed async async def to async def
     user_in: schemas.UserUpdate,
     current_user: CurrentUser,
     db: Session = Depends(get_db), # Changed AsyncSession to Session
@@ -122,7 +123,7 @@ async def update_users_me( # Changed async async def to async def
     return updated_user
 
 @router.put("/profile/password", response_model=common_schemas.Message)
-async def update_users_password( # Changed async async def to async def
+def update_users_password( # Changed async async def to async def
     password_in: schemas.UserPasswordUpdate,
     current_user: CurrentUser,
     db: Session = Depends(get_db), # Changed AsyncSession to Session

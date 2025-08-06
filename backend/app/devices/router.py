@@ -60,7 +60,7 @@ async def update_device(
     if device.user_id != current_user.id and not current_user.is_superuser:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
     updated_device = device_service.device_service.update_device(db=db, device=device, device_in=device_in)
-    db.refresh(updated_device, attribute_names=["owner"])
+    db.refresh(updated_device, attribute_names=["owner", "serial_number_obj"])
     return updated_device
 
 @router.delete("/devices/{device_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -125,10 +125,35 @@ async def create_device(
 ):
     """
     Create a new device.
+    
+    The serial_number must be in the format SNXXXXXXXXXXXXX (SN followed by 13 digits).
+    The serial number must exist in the database and be available for binding.
     """
-    device = device_service.device_service.create_device(db=db, device_in=device_in, owner_id=current_user.id)
-    db.refresh(device, attribute_names=["owner"])
-    return device
+    try:
+        device = device_service.device_service.create_device(db=db, device_in=device_in, owner_id=current_user.id)
+        db.refresh(device, attribute_names=["owner"])
+        return device
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+@router.get("/serial-numbers/", response_model=device_schemas.SerialNumberListResponse)
+async def get_serial_numbers(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=1000),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """
+    Get all serial numbers with their status. (Admin only)
+    """
+    if not current_user.is_superuser:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
+    
+    result = device_service.device_service.get_all_serial_numbers(db=db, skip=skip, limit=limit)
+    return device_schemas.SerialNumberListResponse(
+        serial_numbers=[device_schemas.SerialNumberRead.model_validate(sn, from_attributes=True) for sn in result['serial_numbers']],
+        total=result['total']
+    )
 
 # Get user's devices list
 # GET https://example.com/v1.0/user/devices
@@ -267,3 +292,43 @@ def unlink_account(
     """
     auth_service.unlink_yandex_account(db=db, user=current_user)
     return common_schemas.Message(message="OK")
+
+@router.post("/serial-numbers/", response_model=device_schemas.SerialNumberCreateResponse, status_code=status.HTTP_201_CREATED)
+async def add_serial_number(
+    serial_number_data: device_schemas.SerialNumberCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """
+    Add a single serial number to the database. (Admin only)
+    
+    The serial number must be in the format SNXXXXXXXXXXXXX (SN followed by 13 digits).
+    Example: SN1234567890123
+    
+    Returns:
+    - 201: Serial number successfully created
+    - 400: Invalid format or validation error
+    - 409: Serial number already exists
+    - 403: Insufficient permissions
+    """
+    if not current_user.is_superuser:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
+    
+    success, message, serial_number_obj = device_service.device_service.add_single_serial_number_to_db(
+        db=db, 
+        serial_number=serial_number_data.value
+    )
+    
+    if not success:
+        # Determine appropriate status code based on error type
+        if "Invalid serial number format" in message:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=message)
+        elif "already exists" in message:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=message)
+        else:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=message)
+    
+    return device_schemas.SerialNumberCreateResponse(
+        serial_number=device_schemas.SerialNumberRead.model_validate(serial_number_obj, from_attributes=True),
+        message=message
+    )

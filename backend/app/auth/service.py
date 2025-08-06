@@ -48,7 +48,7 @@ class AuthService:
             name=user_in.name,
             avatar_url=user_in.avatar_url,
             password_hash=hashed_password,
-            is_superuser=False, # Default to non-admin
+            is_superuser=user_in.is_superuser if user_in.is_superuser is not None else False,
             # email_verified_at=None # Requires email verification flow
         )
         db.add(db_user)

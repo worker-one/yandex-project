@@ -14,8 +14,8 @@ from .database.core import get_db
 from .auth.security import decode_token
 from .auth.service import auth_service
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
-oauth2_scheme_optional = OAuth2PasswordBearer(tokenUrl="/api/auth/login", auto_error=False) # For optional authentication
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1.0/auth/login")
+oauth2_scheme_optional = OAuth2PasswordBearer(tokenUrl="/api/v1.0/auth/login", auto_error=False) # For optional authentication
 
 # Add the missing type field to the TokenPayload model
 class TokenPayload(BaseModel):

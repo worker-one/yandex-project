@@ -11,7 +11,6 @@ import { getAccessToken } from '../api/auth';
 export async function fetchApi(endpoint, options = {}, requiresAuth = false) {
     const url = `/api/v1.0${endpoint}`;
     const defaultHeaders = {
-        'Content-Type': 'application/json',
         'Accept': 'application/json',
     };
 
@@ -22,6 +21,11 @@ export async function fetchApi(endpoint, options = {}, requiresAuth = false) {
             ...options.headers,
         },
     };
+
+    // Only set Content-Type to application/json if body is not FormData
+    if (options.body && !(options.body instanceof FormData)) {
+        config.headers['Content-Type'] = 'application/json';
+    }
 
     if (requiresAuth) {
         const token = getAccessToken(); // Use auth module's function

@@ -71,7 +71,7 @@ class Settings(BaseSettings):
 
 
     EMAIL_TEST_USER: EmailStr = "test@example.com"
-    FIRST_SUPERUSER: EmailStr
+    FIRST_SUPERUSER_USERNAME: EmailStr
     FIRST_SUPERUSER_PASSWORD: str
 
     # Yandex OAuth Configuration

@@ -58,8 +58,9 @@ async def health_check():
     
 if __name__ == "__main__":
     import uvicorn
-    from app.database.core import init_db
+    from app.database.core import init_db, drop_db
     # Initialize the database connection
+    drop_db(cascade=True)  # Use CASCADE to drop dependent objects
     init_db()
     # Run the app with Uvicorn if this file is executed directly
     uvicorn.run(app, host=settings.HOST, port=settings.PORT, log_level=LOG_LEVEL)
