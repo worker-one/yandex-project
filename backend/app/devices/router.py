@@ -224,7 +224,7 @@ async def query_user_devices(
 
 # Change device status
 # POST https://example.com/v1.0/user/devices/action
-from app.mqtt import mqtt_client
+from ..mqtt import mqtt_client
 import json
 
 class DeviceActionRequestCapability(device_schemas.DeviceActionCapability):

@@ -1,10 +1,10 @@
 import paho.mqtt.client as mqtt
-from app.config import settings
+from .config import settings
 import logging
 import time
 import json
-from app.database.core import SessionFactory
-from app.devices.models import DeviceStatus, DeviceCommand, DeviceEvent
+from .database.core import SessionFactory
+from .devices.models import DeviceStatus, DeviceCommand, DeviceEvent
 from datetime import datetime
 
 logger = logging.getLogger(__name__)
