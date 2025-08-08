@@ -248,6 +248,29 @@ async def change_device_status(
 ):
     """
     Change device status (Yandex Smart Home compliant).
+    
+    Example request body:
+    
+    ```json
+    {
+    "payload": {
+        "devices": [
+        {
+            "id": "1",
+            "capabilities": [
+            {
+                "type": "devices.capabilities.on_off",
+                "state": {
+                    "instance": "on",
+                    "value": true
+                }
+            }
+            ]
+        }
+        ]
+    }
+    ```
+
     """
     response_devices = []
     for req_device in request.payload.devices:

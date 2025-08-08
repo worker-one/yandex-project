@@ -82,7 +82,7 @@ class DevicePayloadDevice(BaseModel):
     room: str
     type: str = "devices.types.openable.curtain"
     custom_data: Dict[str, Any]
-    capabilities: List[Any]  # changed from Dict[str, Any] to List[Any]
+    capabilities: List[Any] = [{"type": "devices.capabilities.on_off", "state": {"instance": "on", "value": True}}]
     properties: List[Any]    # changed from Dict[str, Any] to List[Any]
     device_info: DeviceInfo
 

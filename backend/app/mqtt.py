@@ -59,20 +59,20 @@ class MQTTClient:
 
             with SessionFactory() as db_session:
                 if sub_topic == "info":
-                    self.handle_info(db_session, device_id, payload)
+                    self.handle_info(db_session, int(device_id), payload)
                 elif sub_topic == "warning":
-                    self.handle_warning(db_session, device_id, payload)
+                    self.handle_warning(db_session, int(device_id), payload)
                 elif sub_topic == "error":
-                    self.handle_error(db_session, device_id, payload)
+                    self.handle_error(db_session, int(device_id), payload)
                 elif sub_topic == "command" and len(topic_parts) > 3 and topic_parts[3] == "response":
-                    self.handle_command_response(db_session, device_id, payload)
+                    self.handle_command_response(db_session, int(device_id), payload)
 
         except json.JSONDecodeError:
             logger.error(f"Failed to decode JSON payload: {msg.payload.decode()}")
         except Exception as e:
             logger.error(f"Error processing message on topic {msg.topic}: {e}")
 
-    def handle_info(self, db, device_id, payload):
+    def handle_info(self, db, device_id: int, payload: dict):
         status = db.query(DeviceStatus).filter(DeviceStatus.device_id == device_id).first()
         if not status:
             status = DeviceStatus(device_id=device_id)
