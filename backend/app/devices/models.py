@@ -1,5 +1,6 @@
+from datetime import datetime
 from sqlalchemy import (
-    Column, Integer, String, ForeignKey, Boolean
+   Column, Integer, String, ForeignKey, Boolean, DateTime
 )
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -60,3 +61,35 @@ class Device(Base, TimeStampMixin):
     def serial_number(self):
         """Get the serial number string from the related SerialNumber object."""
         return self.serial_number_obj.value if self.serial_number_obj else None
+
+
+# Device status tracking
+class DeviceStatus(Base):
+    __tablename__ = "device_statuses"
+    
+    id = Column(Integer, primary_key=True)
+    device_id = Column(Integer, ForeignKey("devices.id"))
+    is_online = Column(Boolean, default=False)
+    battery_level = Column(Integer, nullable=True)
+    last_seen = Column(DateTime, default=datetime.utcnow)
+    
+# Command history
+class DeviceCommand(Base):
+    __tablename__ = "device_commands"
+    
+    id = Column(Integer, primary_key=True)
+    device_id = Column(Integer, ForeignKey("devices.id"))
+    command_type = Column(String)  # "open", "close"
+    status = Column(String)  # "pending", "success", "error"
+    created_at = Column(DateTime, default=datetime.utcnow)
+    completed_at = Column(DateTime, nullable=True)
+
+# Device events
+class DeviceEvent(Base):
+    __tablename__ = "device_events"
+
+    id = Column(Integer, primary_key=True)
+    device_id = Column(Integer, ForeignKey("devices.id"))
+    event_type = Column(String) # "warning", "error"
+    message = Column(String)
+    created_at = Column(DateTime, default=datetime.utcnow)

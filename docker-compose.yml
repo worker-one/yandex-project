@@ -11,7 +11,30 @@ services:
       POSTGRES_PASSWORD: ${PG_PASSWORD}
       POSTGRES_DB: ${PG_DB}
     ports:
-      - "5432:5432" # Optional: if you need to connect to DB from host machine
+      - "5432:5432"
+
+  mosquitto:
+    image: eclipse-mosquitto:2
+    restart: always
+    ports:
+      - "1883:1883"  # MQTT port
+      - "9001:9001"  # WebSocket port
+    volumes:
+      - ./mosquitto/config:/mosquitto/config
+      - ./mosquitto/data:/mosquitto/data
+      - ./mosquitto/log:/mosquitto/log
+    environment:
+      - MOSQUITTO_USERNAME=${MQTT_USERNAME}
+      - MOSQUITTO_PASSWORD=${MQTT_PASSWORD}
+    networks:
+      default:
+        aliases:
+          - mqtt
+    healthcheck:
+      test: ["CMD", "mosquitto_pub", "-h", "localhost", "-t", "test", "-m", "test", "-u", "${MQTT_USERNAME}", "-P", "${MQTT_PASSWORD}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   backend:
     build:
@@ -20,14 +43,18 @@ services:
     ports:
       - "8000:8000"
     env_file:
-      - ./.env # Load variables from the root .env file
+      - ./.env
     environment:
-      # Construct DATABASE_URL using variables from the root .env file
-      # This will override DATABASE_URL if it's also set in ./backend/.env
       DATABASE_URL: postgresql://${PG_USER}:${PG_PASSWORD}@db:5432/${PG_DB}
+      MQTT_BROKER_HOST: mosquitto
+      MQTT_BROKER_PORT: 1883
+      MQTT_USERNAME: ${MQTT_USERNAME}
+      MQTT_PASSWORD: ${MQTT_PASSWORD}
     depends_on:
-      - db
-
+      db:
+        condition: service_started
+      mosquitto:
+        condition: service_healthy
 
   frontend:
     build:

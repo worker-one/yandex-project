@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr, Field
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 
 # --- User Schemas ---
@@ -62,3 +62,10 @@ class YandexCallbackResponseData(BaseModel):
     access_token: str
     refresh_token: str
     user_profile: UserRead # Use your existing UserRead schema
+
+# --- Pagination Schemas ---
+class UsersListResponse(BaseModel):
+    users: List[UserRead]
+    total: int
+    skip: int
+    limit: int

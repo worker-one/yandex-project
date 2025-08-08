@@ -357,5 +357,21 @@ class AuthService:
         db.refresh(new_user)
         return new_user
 
+    def get_all_users(self, db: Session, skip: int = 0, limit: int = 100) -> List[User]:
+        """Get all users with pagination"""
+        result = db.execute(
+            select(User)
+            .offset(skip)
+            .limit(limit)
+            .order_by(User.created_at.desc())
+        )
+        return result.scalars().all()
+
+    def get_users_count(self, db: Session) -> int:
+        """Get total count of users"""
+        from sqlalchemy import func
+        result = db.execute(select(func.count(User.id)))
+        return result.scalar()
+
 
 auth_service = AuthService()

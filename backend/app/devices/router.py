@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from typing import List
 
 from app.database.core import get_db
+from app.devices import models as device_models
 from app.devices import schemas as device_schemas
 from app.devices import service as device_service
 from app import schemas as common_schemas
@@ -223,6 +224,9 @@ async def query_user_devices(
 
 # Change device status
 # POST https://example.com/v1.0/user/devices/action
+from app.mqtt import mqtt_client
+import json
+
 class DeviceActionRequestCapability(device_schemas.DeviceActionCapability):
     state: dict
 
@@ -264,6 +268,25 @@ async def change_device_status(
                     device_in=device_schemas.DeviceUpdate(status=new_status)
                 )
                 db.refresh(device)
+
+                # Create a command record
+                command = device_models.DeviceCommand(
+                    device_id=device.id,
+                    command_type="open" if new_status == "on" else "close",
+                    status="pending"
+                )
+                db.add(command)
+                db.commit()
+                db.refresh(command)
+
+                # Publish MQTT message
+                topic = f"{current_user.id}/{device.id}/command"
+                payload = json.dumps({
+                    "command": "open" if new_status == "on" else "close",
+                    "command_id": command.id
+                })
+                mqtt_client.publish(topic, payload)
+
                 device_capabilities.append(device_schemas.DeviceActionCapability(
                     type=cap.type,
                     state={

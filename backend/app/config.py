@@ -81,6 +81,10 @@ class Settings(BaseSettings):
     # and the one used by your frontend to initiate OAuth flow.
     YANDEX_REDIRECT_URI: str = "http://localhost:3000/auth/yandex/callback"
 
+    MQTT_USERNAME: str = "mosquitto_user"
+    MQTT_PASSWORD: str = "mosquitto_password"
+    MQTT_BROKER_HOST: str = "mosquitto"
+    MQTT_BROKER_PORT: int = 1883
 
     def _check_default_secret(self, var_name: str, value: str | None) -> None:
         if value == "changethis":

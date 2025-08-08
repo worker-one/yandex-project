@@ -305,3 +305,34 @@ async def oauth_token_endpoint(
         "token_type": "bearer",
         "refresh_token": refresh_token,
     }
+
+# Add a dependency for superuser check
+def get_current_superuser(current_user: CurrentUser) -> User:
+    if not current_user.is_superuser:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not enough permissions. Superuser access required."
+        )
+    return current_user
+
+CurrentSuperUser = Annotated[User, Depends(get_current_superuser)]
+
+@router.get("/users", response_model=schemas.UsersListResponse)
+def list_all_users(
+    current_superuser: CurrentSuperUser,
+    db: Session = Depends(get_db),
+    skip: int = Query(0, ge=0, description="Number of users to skip"),
+    limit: int = Query(100, ge=1, le=1000, description="Maximum number of users to return"),
+):
+    """
+    List all users. Requires superuser permissions.
+    """
+    users = auth_service.get_all_users(db=db, skip=skip, limit=limit)
+    total = auth_service.get_users_count(db=db)
+    
+    return schemas.UsersListResponse(
+        users=users,
+        total=total,
+        skip=skip,
+        limit=limit
+    )
