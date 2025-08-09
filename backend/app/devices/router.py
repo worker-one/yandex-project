@@ -137,6 +137,49 @@ async def create_device(
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
+
+@router.get("/devices/{device_id}/commands", response_model=device_schemas.DeviceCommandListResponse)
+async def get_device_commands(
+    device_id: int,
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=1000),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """
+    Get commands for a specific device.
+    """
+    device = device_service.device_service.get_device_by_id(db=db, device_id=device_id)
+    if not device:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Device not found")
+    if device.user_id != current_user.id and not current_user.is_superuser:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
+
+    commands = device_service.device_service.get_device_commands(db=db, device_id=device_id, skip=skip, limit=limit)
+    return commands
+
+
+@router.get("/devices/{device_id}/events", response_model=device_schemas.DeviceEventListResponse)
+async def get_device_events(
+    device_id: int,
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=1000),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """
+    Get events for a specific device.
+    """
+    device = device_service.device_service.get_device_by_id(db=db, device_id=device_id)
+    if not device:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Device not found")
+    if device.user_id != current_user.id and not current_user.is_superuser:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
+
+    events = device_service.device_service.get_device_events(db=db, device_id=device_id, skip=skip, limit=limit)
+    return events
+
+
 @router.get("/serial-numbers/", response_model=device_schemas.SerialNumberListResponse)
 async def get_serial_numbers(
     skip: int = Query(0, ge=0),
@@ -173,7 +216,7 @@ async def get_user_devices(
         user_id=current_user.id,
         skip=skip,
         limit=limit,
-        options=[selectinload(Device.owner)]
+        options=[selectinload(Device.owner), selectinload(Device.serial_number_obj)]
     )
     # Transform devices to required format
     def device_to_payload(device):
@@ -194,6 +237,7 @@ async def get_user_devices(
             device_info=device_schemas.DeviceInfo(
                 manufacturer="Elkarobotics",
                 model="Unknown",
+                serial_number=device.serial_number or "Unknown",
                 hw_version="1.0",
                 sw_version="1.0"
             )

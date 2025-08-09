@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field, ConfigDict
 from typing import Any, Dict, List, Optional
+from datetime import datetime
 from app.auth.schemas import UserRead
 
 class DeviceBase(BaseModel):
@@ -71,6 +72,7 @@ class DeviceStatusInfo(BaseModel):
 class DeviceInfo(BaseModel):
     manufacturer: str
     model: str
+    serial_number: str
     hw_version: str
     sw_version: str
 
@@ -138,3 +140,34 @@ class SerialNumberListResponse(BaseModel):
     total: int
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class DeviceCommandRead(BaseModel):
+    id: int
+    device_id: int
+    command_type: str
+    status: str
+    created_at: datetime
+    completed_at: Optional[datetime] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class DeviceCommandListResponse(BaseModel):
+    commands: List[DeviceCommandRead]
+    total: int
+
+
+class DeviceEventRead(BaseModel):
+    id: int
+    device_id: int
+    event_type: str
+    message: str
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class DeviceEventListResponse(BaseModel):
+    events: List[DeviceEventRead]
+    total: int

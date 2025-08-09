@@ -136,3 +136,20 @@ export function addLogoutHandler(logoutButton, redirectUrl) {
         }
     });
 }
+
+/**
+ * Fetches logs for a specific device.
+ * @param {string} deviceId - The ID of the device.
+ * @returns {Promise<Array<object>>} - A list of log entries.
+ */
+export async function getDeviceLogs(deviceId) {
+    return fetchApi(`/devices/${deviceId}/logs`, { method: 'GET' }, true);
+}
+
+/**
+ * Fetches all logs.
+ * @returns {Promise<Array<object>>} - A list of log entries.
+ */
+export async function getAllLogs() {
+    return fetchApi(`/logs`, { method: 'GET' }, true);
+}

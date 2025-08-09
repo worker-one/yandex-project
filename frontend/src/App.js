@@ -1,5 +1,5 @@
 import React from 'react';
-import { HashRouter, Routes, Route } from 'react-router'; // Changed import
+import { Routes, Route } from 'react-router';
 import { CssBaseline, ThemeProvider, createTheme } from '@mui/material';
 import IndexPage from './pages/index.js';
 import ItemsTablePage from './pages/items/Table.js';
@@ -9,6 +9,8 @@ import ProfilePage from './pages/auth/profile.js';
 import ItemsDetailsPage from './pages/items/Details.js';
 import YandexOAuthCallbackPage from './pages/auth/YandexOAuthCallbackPage.js';
 import CreateItemPage from './pages/items/Create.js';
+import LogsPage from './pages/items/Logs.js';
+import DeviceLogsPage from './pages/items/DeviceLogs.js';
 
 // Basic theme for Material UI
 const theme = createTheme({
@@ -28,8 +30,8 @@ const theme = createTheme({
             secondary: '#a0a0a0', // Secondary text color
         },
         mode: 'light', // Light mode by default
-        sucess: {
-            main: '#4caf50', // Success color
+        success: {
+            main: '#4caf50', // Success color (fixed typo from 'sucess')
         },
     },
 });
@@ -47,6 +49,8 @@ function App() {
                     <Route path="/profile" element={<ProfilePage />} />
                     <Route path="/devices/create" element={<CreateItemPage />} />
                     <Route path="/devices/:itemId" element={<ItemsDetailsPage />} />
+                    <Route path="/devices/:deviceId/logs" element={<DeviceLogsPage />} />
+                    <Route path="/logs" element={<LogsPage />} />
                     <Route path="/auth/yandex/callback" element={<YandexOAuthCallbackPage />} />
                     {/* Catch-all route for handling 404s */}
                     <Route path="*" element={<div>Page not found</div>} />

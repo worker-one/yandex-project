@@ -356,4 +356,44 @@ class DeviceService:
             logger.error(error_msg)
             return False, error_msg, None
 
+    def get_device_commands(self, db: Session, device_id: int, skip: int = 0, limit: int = 100):
+        """Retrieve commands for a specific device with pagination."""
+        logger.info(f"Retrieving commands for device with id {device_id}.")
+
+        query = select(device_models.DeviceCommand).filter(device_models.DeviceCommand.device_id == device_id).order_by(desc(device_models.DeviceCommand.created_at))
+
+        total_query = select(func.count(device_models.DeviceCommand.id)).filter(device_models.DeviceCommand.device_id == device_id)
+        total = db.scalar(total_query)
+
+        query = query.offset(skip).limit(limit)
+        result = db.execute(query)
+        commands = result.scalars().all()
+
+        commands_read = [device_schemas.DeviceCommandRead.model_validate(command, from_attributes=True) for command in commands]
+
+        return device_schemas.DeviceCommandListResponse(
+            commands=commands_read,
+            total=total
+        )
+
+    def get_device_events(self, db: Session, device_id: int, skip: int = 0, limit: int = 100):
+        """Retrieve events for a specific device with pagination."""
+        logger.info(f"Retrieving events for device with id {device_id}.")
+
+        query = select(device_models.DeviceEvent).filter(device_models.DeviceEvent.device_id == device_id).order_by(desc(device_models.DeviceEvent.created_at))
+
+        total_query = select(func.count(device_models.DeviceEvent.id)).filter(device_models.DeviceEvent.device_id == device_id)
+        total = db.scalar(total_query)
+
+        query = query.offset(skip).limit(limit)
+        result = db.execute(query)
+        events = result.scalars().all()
+
+        events_read = [device_schemas.DeviceEventRead.model_validate(event, from_attributes=True) for event in events]
+
+        return device_schemas.DeviceEventListResponse(
+            events=events_read,
+            total=total
+        )
+
 device_service = DeviceService()

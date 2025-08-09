@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
-  TableSortLabel, TablePagination, CircularProgress, Typography, Box, Button, Link as MuiLink // Removed Chip
+  TableSortLabel, TablePagination, CircularProgress, Typography, Box, Button, Link as MuiLink, IconButton
 } from '@mui/material';
 import { Link as RouterLink, useNavigate } from 'react-router';
 import { getUserDevices as fetchUserDevicesAPI } from '../../api/devices'; // Use correct API function
+import EventNoteIcon from '@mui/icons-material/EventNote';
 
 const DEFAULT_ROWS_PER_PAGE = 20;
 
@@ -12,6 +13,8 @@ const headCells = [
   { id: 'index', numeric: true, disablePadding: false, label: '#', sortable: false, align: 'center' },
   { id: 'name', numeric: false, disablePadding: false, label: 'Name', sortable: true, align: 'left' },
   { id: 'room', numeric: false, disablePadding: false, label: 'Room', sortable: true, align: 'left' },
+  { id: 'serial_number', numeric: false, disablePadding: false, label: 'Serial Number', sortable: false, align: 'left' },
+  { id: 'battery', numeric: true, disablePadding: false, label: 'Battery, %', sortable: true, align: 'center' },
   { id: 'actions', numeric: false, disablePadding: false, label: 'Actions', sortable: false, align: 'center' },
 ];
 
@@ -46,12 +49,13 @@ const DevicesTable = ({ refreshTrigger }) => { // Add refreshTrigger to props
       const devicesArray = data.payload?.devices || [];
       const mappedDevices = devicesArray.map(device => ({
         id: device.id,
-        serial_number: device.device_info?.serial_number || device.custom_data?.serial_number || '', // safe access
+        serial_number: device.device_info?.serial_number || device.custom_data?.serial_number || 'N/A', // safe access
         name: device.name,
         description: device.description,
         type: device.type,
         room: device.room,
-        device_info: device.device_info || null // ensure device_info is present for later access
+        device_info: device.device_info || null, // ensure device_info is present for later access
+        battery: device.capabilities?.find(c => c.type === 'devices.capabilities.range' && c.parameters.instance === 'battery_level')?.state.value
       }));
       
       setDevices(mappedDevices);
@@ -174,6 +178,18 @@ const DevicesTable = ({ refreshTrigger }) => { // Add refreshTrigger to props
                       </Typography>
                     </TableCell>
 
+                    <TableCell align="left">
+                      <Typography variant="body2">
+                        {device.device_info.serial_number}
+                      </Typography>
+                    </TableCell>
+
+                    <TableCell align="center">
+                      <Typography variant="body2">
+                        {device.battery !== undefined ? device.battery : 'N/A'}
+                      </Typography>
+                    </TableCell>
+
                     {/* Actions */}
                     <TableCell align="center">
                       <Button
@@ -186,6 +202,15 @@ const DevicesTable = ({ refreshTrigger }) => { // Add refreshTrigger to props
                       >
                         Details
                       </Button>
+                      <IconButton
+                        component={RouterLink}
+                        to={`/devices/${device.id}/logs`}
+                        size="small"
+                        onClick={(e) => e.stopPropagation()}
+                        sx={{ ml: 1 }}
+                      >
+                        <EventNoteIcon />
+                      </IconButton>
                     </TableCell>
                   </TableRow>
                 );

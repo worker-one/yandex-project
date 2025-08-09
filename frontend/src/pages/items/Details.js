@@ -64,12 +64,6 @@ const ItemsDetailsPage = () => {
         );
     }
 
-    const breadcrumbLinks = [
-        { name: 'Home', href: '/' },
-        { name: 'Devices', href: '/devices' },
-        { name: item.name || 'Details' }, // Use item name if available, otherwise 'Details'
-    ];
-
     return (
         <>
             <Header />
@@ -86,9 +80,11 @@ const ItemsDetailsPage = () => {
                         <Typography color="text.primary">{item.name}</Typography>
                     </Breadcrumbs>
 
-                    <Button component={RouterLink} to="/devices" variant="outlined">
-                        Back to my devices
-                    </Button>
+                    <Box>
+                        <Button component={RouterLink} to={`/devices/${item.id}/logs`} variant="outlined" sx={{ mr: 2 }}>
+                            View Logs
+                        </Button>
+                    </Box>
                 </Box>
                 <ItemDetails item={item} />
             </Container>

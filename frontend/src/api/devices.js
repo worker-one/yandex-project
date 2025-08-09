@@ -110,6 +110,28 @@ export async function syncYandexIoTDevices() {
     return fetchApi('/auth/profile/yandex-iot/sync-devices', { method: 'POST' }, true); // Requires auth
 }
 
+/**
+ * Fetches commands for a specific device.
+ * @param {string} deviceId - The ID of the device.
+ * @param {object} params - Pagination parameters.
+ * @returns {Promise<object>} - The paginated response with device commands.
+ */
+export async function getDeviceCommands(deviceId, params = { skip: 0, limit: 100 }) {
+    const query = new URLSearchParams(params).toString();
+    return fetchApi(`/devices/${deviceId}/commands?${query}`, { method: 'GET' }, true);
+}
+
+/**
+ * Fetches events for a specific device.
+ * @param {string} deviceId - The ID of the device.
+ * @param {object} params - Pagination parameters.
+ * @returns {Promise<object>} - The paginated response with device events.
+ */
+export async function getDeviceEvents(deviceId, params = { skip: 0, limit: 100 }) {
+    const query = new URLSearchParams(params).toString();
+    return fetchApi(`/devices/${deviceId}/events?${query}`, { method: 'GET' }, true);
+}
+
 
 /** addLogoutHandler
  * 

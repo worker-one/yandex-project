@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { AppBar, Toolbar, Typography, Button, Box, Link as MuiLink, Container } from '@mui/material';
-import { Link as RouterLink, NavLink } from 'react-router';
-import { useNavigate } from 'react-router';
-import { isLoggedIn, getUserProfileData, handleLogout as authHandleLogout } from '../../api/auth'; // Added for auth
+import { AppBar, Toolbar, Typography, Button, Box, Link as MuiLink, Container, Menu, MenuItem } from '@mui/material';
+import { Link as RouterLink, useNavigate } from 'react-router';
+import { isLoggedIn, getUserProfileData, handleLogout as authHandleLogout } from '../../api/auth';
 
 const Header = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [userName, setUserName] = useState('');
+  const [anchorEl, setAnchorEl] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -14,34 +15,34 @@ const Header = () => {
     setIsAuthenticated(authStatus);
     if (authStatus) {
       const userProfile = getUserProfileData();
-      // Assuming userProfile has an 'is_admin' boolean field or similar
-      // e.g., userProfile.role === 'admin' or userProfile.roles.includes('admin')
-      setIsAdmin(userProfile?.is_admin === true); 
+      setIsAdmin(userProfile?.is_admin === true);
+      setUserName(userProfile?.name || 'User');
     } else {
       setIsAdmin(false);
     }
-  }, []); // Runs on component mount. Re-run if dependencies change or via global state.
+  }, []);
 
   const onLogoutClick = () => {
-    authHandleLogout(); // Calls the original logout logic from auth.js
+    authHandleLogout();
     setIsAuthenticated(false);
     setIsAdmin(false);
-    navigate('/login'); // Navigate to login page using React Router
+    setUserName('');
+    navigate('/login');
   };
 
-  const activeLinkStyle = ({ isActive }) => {
-    return {
-      fontWeight: isActive ? 'bold' : 'normal',
-      // Add other active styles if needed, e.g., textDecoration: 'underline'
-    };
+  const handleMenuOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
   };
 
   return (
-    <AppBar position="static" className="main-header"> {/* Preserving original class */}
-      <Container maxWidth="lg"> {/* Mimics <div class="container"> behavior */}
-        <Toolbar disableGutters sx={{ justifyContent: 'space-between' }}> {/* disableGutters is recommended when Toolbar is a direct child of Container */}
+    <AppBar position="static" className="main-header">
+      <Container maxWidth="lg">
+        <Toolbar disableGutters sx={{ justifyContent: 'space-between' }}>
           
-          {/* Logo Title (left) */}
           <MuiLink
             component={RouterLink}
             to="/"
@@ -50,36 +51,18 @@ const Header = () => {
             >
             <Box
               component="img"
-              // Ensure this path is correct for your React project (e.g., in public folder or imported)
-              src="../../assets/images/logo.png" 
+              src="/assets/images/logo.png" 
               alt="Window Controller App Logo"
-              sx={{ height: 40, mr: 1 }} // mr is margin-right
+              sx={{ height: 40, mr: 1 }}
             />
-            <Typography variant="h6" component="div" className="logo-text"> {/* Preserving original class */}
+            <Typography variant="h6" component="div" className="logo-text">
               Window Controller App
             </Typography>
           </MuiLink>
 
-          {/* Site Navigation (center) */}
-          <Box component="nav" className="site-nav" sx={{ display: 'flex', ml: 4, gap: 4, flexGrow: 1, justifyContent: 'left' }}> {/* Preserving original class */}
-            <Button
-              component={NavLink}
-              to="/devices" // Changed to /devices to match the new route
-              color="inherit"
-              className="nav-link" // Preserving original class, active state handled by NavLink
-              style={activeLinkStyle}
-            >
-              My Devices
-            </Button>
-          </Box>
-
-          {/* Auth Navigation (right) */}
-          <Box component="nav" id="main-nav" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}> {/* Preserving original id */}
+          <Box component="nav" id="main-nav" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             {!isAuthenticated ? (
               <>
-                {/* The "Sign Up" button was commented out in the original HTML */}
-                {/* <Button component={RouterLink} to="/register" variant="contained" color="primary" size="small" id="nav-register-btn">Sign Up</Button> */}
-                
                 <Button
                   component={RouterLink}
                   to="/login" 
@@ -94,14 +77,30 @@ const Header = () => {
               </>
             ) : (
               <>
+                <Typography sx={{ mr: 2 }}>
+                  {userName}
+                </Typography>
+                <Button
+                  color="inherit"
+                  onClick={handleMenuOpen}
+                >
+                  My Devices
+                </Button>
+                <Menu
+                  anchorEl={anchorEl}
+                  open={Boolean(anchorEl)}
+                  onClose={handleMenuClose}
+                >
+                  <MenuItem component={RouterLink} to="/devices" onClick={handleMenuClose}>All Devices</MenuItem>
+                  <MenuItem component={RouterLink} to="/devices/create" onClick={handleMenuClose}>Add Device</MenuItem>
+                </Menu>
                 <Button
                   component={RouterLink}
-                  to="/devices/create"
+                  to="/logs"
                   color="inherit"
                   className="nav-link"
-                  id="nav-add-item-btn"
                 >
-                  Add Device
+                  Logs
                 </Button>
                 <Button
                   component={RouterLink}
